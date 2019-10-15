@@ -125,7 +125,7 @@ class Route
 			$class_name = ucfirst($params[0]); //首字母大写
 
 		//携带命名空间
-		if($this->module)
+		if ($this->module)
 			$this->class = '\\' . 'Controller' . '\\' . implode('\\', $this->module) . '\\' . $class_name;
 		else
 			$this->class = '\\' . 'Controller' . '\\' . $class_name;

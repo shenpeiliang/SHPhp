@@ -91,6 +91,9 @@ class URI
 	 * @return array
 	 */
 	public function get_uri_segments(): array{
+		if(!$this->uri_string)
+			return [];
+
 		return explode('/', $this->uri_string);
 	}
 
