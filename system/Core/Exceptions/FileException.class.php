@@ -1,18 +1,21 @@
 <?php
 namespace Core\Exceptions;
+
 use Core\Exceptions\ExceptionInterface;
 use Core\Exceptions\FremeException;
+
 /**
  * 文件异常基类
  */
-class FileException extends FremeException implements ExceptionInterface{
+class FileException extends FremeException implements ExceptionInterface
+{
 	/**
 	 * 文件找不到
 	 * @return static
 	 */
-	public static function for_not_found()
+	public static function for_not_found(string $file = '')
 	{
-		return new static('文件不存在');
+		return new static('文件不存在' . ($file ?? ''));
 	}
 
 	/**

@@ -130,7 +130,7 @@ class Route
 			$this->class = '\\' . 'Controller' . '\\' . $class_name;
 
 		//剩余参数为方法名和方法参数
-		if (count($params) > 1)
+		if ($params)
 			$params = array_slice($params, 1);
 
 		//设置方法
@@ -150,7 +150,7 @@ class Route
 		$this->method = strtolower($params[0]);
 
 		//剩余参数为方法参数
-		if (count($params) > 1)
+		if ($params)
 			$params = array_slice($params, 1);
 
 		//设置方法参数

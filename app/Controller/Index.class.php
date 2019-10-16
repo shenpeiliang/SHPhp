@@ -1,7 +1,11 @@
 <?php
 namespace Controller;
-class Index{
+use Core\Controller;
+class Index extends Controller{
+
 	public function index(){
-		echo "hello";
+		$this->assign('name', 'hello');
+
+		$this->display();
 	}
 }

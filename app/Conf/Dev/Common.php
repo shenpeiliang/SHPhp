@@ -11,3 +11,6 @@ $config['template_delimiter'] = '_';
 
 //模板文件后缀
 $config['template_suffix'] = '.html';
+
+//模板主题
+$config['template_theme'] = 'default';

@@ -21,7 +21,7 @@ class Controller
 	 * @param $value
 	 * @return $this
 	 */
-	public function assign($name, $value)
+	protected function assign($name, $value)
 	{
 		$this->view->assign($name, $value);
 		return $this;
@@ -33,13 +33,12 @@ class Controller
 	 * @param bool $is_return
 	 * @return string
 	 */
-	public function display(string $template_file, $is_return = FALSE)
+	protected function display(string $template_file = '', $is_return = FALSE)
 	{
 		//直接返回结果，不输出
-		if($is_return)
+		if ($is_return)
 			return $this->view->display($template_file, $is_return);
 
 		$this->view->display($template_file, $is_return);
 	}
-
 }
