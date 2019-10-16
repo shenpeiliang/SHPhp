@@ -7,7 +7,6 @@ namespace Core;
  * 子命名空间代表的是类文件相对于文件基目录的这一段路径（相对路径）
  * 类名则与文件名保持一致（注意大小写的区别）
  */
-use Core\Exceptions\AutoLoadException;
 
 class Route
 {
@@ -66,7 +65,7 @@ class Route
 		$config = include(SYSTEM_PATH . 'Config/Convention.php');
 
 		if (!isset($config['ROUTE']))
-			throw AutoLoadException::for_invalid_param();
+			throw \Core\Exceptions\AutoLoadException::for_invalid_param();
 
 		$this->directory = APP_PATH . 'Controller';
 		$this->class = '\\' . 'Controller' . '\\' . ucfirst($config['ROUTE']['CONTROLLER']);
