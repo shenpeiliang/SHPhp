@@ -23,16 +23,22 @@ class Route
 	private $class = '';
 
 	/**
+	 * 方法
+	 * @var string
+	 */
+	private $method = '';
+
+	/**
 	 * 模块
 	 * @var array
 	 */
 	private $module = [];
 
 	/**
-	 * 方法
+	 * 类名称
 	 * @var string
 	 */
-	private $method = '';
+	private $class_name = '';
 
 	/**
 	 * 方法参数
@@ -62,14 +68,15 @@ class Route
 	 */
 	private function _set_default_route()
 	{
-		$config = include(SYSTEM_PATH . 'Config/Convention.php');
+		$config = config('common.route');
 
-		if (!isset($config['ROUTE']))
+		if (empty($config))
 			throw \Core\Exceptions\AutoLoadException::for_invalid_param();
 
 		$this->directory = APP_PATH . 'Controller';
-		$this->class = '\\' . 'Controller' . '\\' . ucfirst($config['ROUTE']['CONTROLLER']);
-		$this->method = strtolower($config['ROUTE']['METHOD']);
+		$this->class = '\\' . 'Controller' . '\\' . ucfirst($config['controller']);
+		$this->method = strtolower($config['method']);
+		$this->class_name = $config['controller'];
 	}
 
 	/**
@@ -128,6 +135,9 @@ class Route
 			$this->class = '\\' . 'Controller' . '\\' . implode('\\', $this->module) . '\\' . $class_name;
 		else
 			$this->class = '\\' . 'Controller' . '\\' . $class_name;
+
+		//类名称
+		$this->class_name = $class_name;
 
 		//剩余参数为方法名和方法参数
 		if ($params)
@@ -203,5 +213,19 @@ class Route
 	public function get_class(): string
 	{
 		return $this->class;
+	}
+
+	/**
+	 * 返回模块、控制器、方法参数段
+	 * @return array
+	 */
+	public function get_uri_segments(): array
+	{
+		$uri_segments = $this->module;
+		array_push($uri_segments, $this->class_name);
+		array_push($uri_segments, $this->method);
+
+		return $uri_segments;
+
 	}
 }

@@ -69,22 +69,22 @@ class Config
 
 		}
 
-		$file_config = self::$config[$file];
+		$config = self::$config[$file];
 
 		while ($keys)
 		{
 			$key = array_shift($keys);
 
 			//如果不存在，直接返回默认值，不再递归
-			if (!isset($file_config[$key]))
+			if (!isset($config[$key]))
 			{
-				$res = $default;
+				$config = $default;
 				break;
 			}
 
-			$res = $file_config[$key];
+			$config = $config[$key];
 		}
 
-		return $res;
+		return $config;
 	}
 }

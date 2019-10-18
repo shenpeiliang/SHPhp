@@ -1,7 +1,7 @@
 <?php
 namespace Core;
 /**
- * 模板引擎处理
+ * 视图处理
  * Class View
  */
 class View
@@ -12,21 +12,8 @@ class View
 	 */
 	protected $var = [];
 
-	/**
-	 * ob缓存层级
-	 * @var int
-	 */
-	private $current_ob_level = 0;
-
-	/**
-	 * 模板内容
-	 * @var string
-	 */
-	private $content = '';
-
 	function __construct()
 	{
-		$this->current_ob_level = ob_get_level();
 	}
 
 	/**
@@ -66,13 +53,9 @@ class View
 		//关闭绝对刷送
 		ob_implicit_flush(0);
 
-		include $absolute_path;
-
-		//嵌套输出
-		if (ob_get_level() > $this->current_ob_level)
-			ob_end_flush();
-		else
-			$this->content .= ob_get_contents();
+		//解析模板标签
+		$template = new \Core\Template();
+		$template->parse($absolute_path);
 
 		//获取并清空缓存
 		$content = ob_get_clean();
@@ -103,9 +86,8 @@ class View
 			return $dir_view . '/' . $template_file . config('common.template_suffix');
 
 		//模块对应文件夹  控制名+方法名
-		$uri = new \Core\URI();
-		$uri->parse_request_uri();
-		$uri_segments = $uri->get_uri_segments();
+		$route = new \Core\Route();
+		$uri_segments = $route->get_uri_segments();
 
 		//非模块参数
 		$param_not_module = [];
