@@ -19,7 +19,7 @@ $config['template_theme'] = 'default';
 $config['template_compile_path'] = SRC_PATH .'Runtimes/';
 //插件标签
 $config['template_tag']['taglib_begin'] = '<';
-$config['template_tag']['taglib_end'] = '/>';
+$config['template_tag']['taglib_end'] = '>';
 //变量标签
 $config['template_tag']['tmpl_l_delim'] = '<{';
 $config['template_tag']['tmpl_r_delim'] = '}>';

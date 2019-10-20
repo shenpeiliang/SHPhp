@@ -37,28 +37,16 @@ class View
 	 * @param bool $is_return
 	 * @return string
 	 */
-	public function display(string $template_file = '', $is_return = FALSE)
+	public function display(string $template_file, bool $is_return = FALSE)
 	{
 		//模板绝对路径
 		$absolute_path = $this->get_template_path($template_file);
 		if (!is_file($absolute_path))
 			throw \Core\Exceptions\FileException::for_not_found($absolute_path);
 
-		//模板阵列变量分解成为独立变量
-		extract($this->var, EXTR_OVERWRITE);
-
-		//页面缓存
-		ob_start();
-
-		//关闭绝对刷送
-		ob_implicit_flush(0);
-
 		//解析模板标签
-		$template = new \Core\Template();
-		$template->parse($absolute_path);
-
-		//获取并清空缓存
-		$content = ob_get_clean();
+		$template = new \Core\Template\Driver\FrameTemp($this->var);
+		$content = $template->fetch($absolute_path);
 
 		//直接返回结果，不输出
 		if ($is_return)
@@ -77,7 +65,7 @@ class View
 	 * @param string $template_file
 	 * @return string
 	 */
-	private function get_template_path(string $template_file = ''): string
+	private function get_template_path(string $template_file): string
 	{
 		//模板路径
 		$dir_view = APP_PATH . 'View/' . ucfirst(config('common.template_theme'));

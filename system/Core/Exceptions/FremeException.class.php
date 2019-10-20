@@ -7,9 +7,9 @@ use Core\Exceptions\ExceptionInterface;
 class FremeException extends \Exception implements ExceptionInterface {
 	/**
 	 * 系统错误记录
-	 * @param \Exception $error
+	 * @param $error
 	 */
-	public static function for_system_error(\Exception $error){
+	public static function for_system_error($error){
 		//记录日志文件
 
 		if(APP_DEBUG){

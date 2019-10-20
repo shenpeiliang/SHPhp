@@ -1,3 +1,9 @@
-<include file="./../app/View/Default/header.html"/>
-<{$name}>
-<include file="./../app/View/Default/footer.html"/>
+<include file="./../app/View/Default/header.html">
+变量：<{$name}>
+    条件：
+<if condition="true">
+    <p>is true</p>
+<else/>
+    <p>is false</p>
+</if>
+<include file="./../app/View/Default/footer.html">
