@@ -45,8 +45,8 @@ class View
 			throw \Core\Exceptions\FileException::for_not_found($absolute_path);
 
 		//解析模板标签
-		$template = new \Core\Template\Driver\FrameTemp($this->var);
-		$content = $template->fetch($absolute_path);
+		$template = new \Core\Template\Driver\FrameTemp();
+		$content = $template->fetch($absolute_path, $this->var);
 
 		//直接返回结果，不输出
 		if ($is_return)

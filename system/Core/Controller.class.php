@@ -15,13 +15,13 @@ class Controller
 		$this->view = new \Core\View();
 	}
 
-	/**
-	 * 模板变量
-	 * @param $name
-	 * @param $value
-	 * @return $this
-	 */
-	protected function assign($name, $value)
+    /**
+     * 模板变量
+     * @param string $name
+     * @param $value
+     * @return $this
+     */
+	protected function assign(string $name, $value)
 	{
 		$this->view->assign($name, $value);
 		return $this;

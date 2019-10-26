@@ -1,9 +1,14 @@
 <include file="./../app/View/Default/header.html">
 变量：<{$name}>
     条件：
-<if condition="true">
+<if condition="$name">
     <p>is true</p>
 <else/>
     <p>is false</p>
 </if>
+<foreach name="lists" item="v">
+    <p><{$key}> => <{$v}></p>
+</foreach>
+    <p>常量：<{__ENVIRONMENT__}></p>
+    <p>变量支持函数： <{$now|trim|date='Y-m-d H:i:s', ###}> </p>
 <include file="./../app/View/Default/footer.html">
