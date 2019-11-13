@@ -24,13 +24,13 @@ class Loader
 	 */
 	private static function _init()
 	{
-		$config = include(SYSTEM_PATH . 'Config/Convention.php');
+        $config = include(SYSTEM_PATH . 'Config/Convention.php');
 
-		if (!isset($config['LOADER']['PSR4']))
-			throw AutoLoadException::for_invalid_param();
+        if (!isset($config['loader']['psr4']))
+            throw AutoLoadException::for_invalid_param();
 
-		self::$psr4['map'] = $config['LOADER']['PSR4']['MAP'];
-		self::$psr4['file_suffixes'] = $config['LOADER']['PSR4']['FILE_SUFFIXES'];
+        self::$psr4['map'] = $config['loader']['psr4']['map'];
+		self::$psr4['file_suffixes'] = $config['loader']['psr4']['file_suffixes'];
 	}
 
 	/**
@@ -80,7 +80,7 @@ class Loader
 	private static function _include_file(String $file)
 	{
 		if (!is_file($file))
-			throw AutoLoadException::for_file_not_found();
+            throw AutoLoadException::for_file_not_found();
 
 		require_once $file;
 	}

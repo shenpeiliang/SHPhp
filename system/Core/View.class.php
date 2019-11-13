@@ -53,9 +53,9 @@ class View
 			return $content;
 
 		//网页字符编码
-		header('Content-Type:text/html; charset=' . config('common.default_charset'));
+		header('Content-Type:text/html; charset=' . convention_config('default_charset'));
 		//页面缓存控制
-		header('Cache-control: ' . config('common.http_cache_control'));
+		header('Cache-control: ' . convention_config('http_cache_control'));
 		echo $content;
 	}
 
@@ -68,10 +68,10 @@ class View
 	private function get_template_path(string $template_file): string
 	{
 		//模板路径
-		$dir_view = APP_PATH . 'View/' . ucfirst(config('common.template_theme'));
+		$dir_view = APP_PATH . 'View/' . ucfirst(convention_config('template_theme'));
 
 		if ($template_file)
-			return $dir_view . '/' . $template_file . config('common.template_suffix');
+			return $dir_view . '/' . $template_file . convention_config('template_suffix');
 
 		//模块对应文件夹  控制名+方法名
 		$route = new \Core\Route();
@@ -88,6 +88,6 @@ class View
 				$param_not_module[] = $item;
 		}
 
-		return $dir_view . '/' . ucfirst(implode(config('common.template_delimiter'), $param_not_module)) . config('common.template_suffix');
+		return $dir_view . '/' . ucfirst(implode(convention_config('template_delimiter'), $param_not_module)) . convention_config('template_suffix');
 	}
 }

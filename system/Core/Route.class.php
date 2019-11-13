@@ -68,7 +68,7 @@ class Route
 	 */
 	private function _set_default_route()
 	{
-		$config = config('common.route');
+		$config = convention_config('route');
 
 		if (empty($config))
 			throw \Core\Exceptions\AutoLoadException::for_invalid_param();

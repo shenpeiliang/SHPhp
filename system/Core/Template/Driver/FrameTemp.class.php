@@ -30,11 +30,11 @@ class FrameTemp implements TemplateInterface
 
     function __construct()
     {
-        $this->template_compile_path = config('common.template_compile_path');
-        $this->config['taglib_begin'] = $this->_rebuild_tag_preg(config('common.template_tag.taglib_begin'));
-        $this->config['taglib_end'] = $this->_rebuild_tag_preg(config('common.template_tag.taglib_end'));
-        $this->config['tmpl_l_delim'] = $this->_rebuild_tag_preg(config('common.template_tag.tmpl_l_delim'));
-        $this->config['tmpl_r_delim'] = $this->_rebuild_tag_preg(config('common.template_tag.tmpl_r_delim'));
+        $this->template_compile_path = convention_config('template_compile_path');
+        $this->config['taglib_begin'] = $this->_rebuild_tag_preg(convention_config('template_tag.taglib_begin'));
+        $this->config['taglib_end'] = $this->_rebuild_tag_preg(convention_config('template_tag.taglib_end'));
+        $this->config['tmpl_l_delim'] = $this->_rebuild_tag_preg(convention_config('template_tag.tmpl_l_delim'));
+        $this->config['tmpl_r_delim'] = $this->_rebuild_tag_preg(convention_config('template_tag.tmpl_r_delim'));
     }
 
     /**
