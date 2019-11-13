@@ -7,8 +7,6 @@
  */
 namespace Core;
 
-use Core\Exceptions\AutoLoadException;
-
 class Loader
 {
 	/**
@@ -27,7 +25,7 @@ class Loader
         $config = include(SYSTEM_PATH . 'Config/Convention.php');
 
         if (!isset($config['loader']['psr4']))
-            throw AutoLoadException::for_invalid_param();
+            throw new \Exception('缺少配置loader');
 
         self::$psr4['map'] = $config['loader']['psr4']['map'];
 		self::$psr4['file_suffixes'] = $config['loader']['psr4']['file_suffixes'];
@@ -80,7 +78,7 @@ class Loader
 	private static function _include_file(String $file)
 	{
 		if (!is_file($file))
-            throw AutoLoadException::for_file_not_found();
+            throw new \Exception('文件不存在');
 
 		require_once $file;
 	}
