@@ -45,12 +45,42 @@ class Loader
 	}
 
 	/**
+	 * 自动加载Smarty
+	 * @param String $class
+	 */
+	private static function _parse_file_smarty(String $class){
+		$_class = strtolower($class);
+		$_classes = array(
+			'smarty_config_source' => true,
+			'smarty_config_compiled' => true,
+			'smarty_security' => true,
+			'smarty_cacheresource' => true,
+			'smarty_cacheresource_custom' => true,
+			'smarty_cacheresource_keyvaluestore' => true,
+			'smarty_resource' => true,
+			'smarty_resource_custom' => true,
+			'smarty_resource_uncompiled' => true,
+			'smarty_resource_recompiled' => true,
+		);
+
+		if (!strncmp($_class, 'smarty_internal_', 16) || isset($_classes[$_class])) {
+			return SYSTEM_PATH . 'Core/Vendor/Smarty/sysplugins/' . $_class . '.php';
+		}
+
+		return false;
+	}
+
+	/**
 	 * 解析文件路径
 	 * @param String $class
 	 * @return String
 	 */
 	private static function _parse_file(String $class): String
 	{
+		//是否是smarty加载
+		if($file = self::_parse_file_smarty($class))
+			return $file;
+
 		//顶级命名空间
 		$vendor = substr($class, 0, strpos($class, '\\'));
 
@@ -78,7 +108,7 @@ class Loader
 	private static function _include_file(String $file)
 	{
 		if (!is_file($file))
-            throw new \Exception('文件不存在');
+            throw new \Exception('文件不存在:' . $file);
 
 		require_once $file;
 	}

@@ -1,0 +1,18 @@
+<{include file="header.html"}>
+变量：<{$name}>
+    <br/>
+    <br/>
+    <br/>
+    条件：
+<{if $name}>
+    <p>is true</p>
+<{else}>
+    <p>is false</p>
+<{/if}>
+<{foreach from=$lists key=key item=v}>
+<p><{$key}> => <{$v}></p>
+<{/foreach}>
+
+<!--<{include file="smarty/section.html"}>-->
+
+<{include file="footer.html"}>

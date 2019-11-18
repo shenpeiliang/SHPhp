@@ -1,0 +1,14 @@
+<include file="./../app/View/Default/header.html">
+变量：<{$name}>
+    条件：
+    <{if $name}>
+    <p>is true</p>
+    <{else}>
+    <p>is false</p>
+    <{/if}>
+    <{foreach from=$lists key=key item=v}>
+    <p><{$key}> => <{$v}></p>
+    <{/foreach}>
+    <p>常量：<{$smarty.const.ENVIRONMENT}></p>
+    <p>变量支持函数： <{$now|date_format:'%Y-%m-%d %H:%M:%S'}> </p>
+<include file="./../app/View/Default/footer.html">

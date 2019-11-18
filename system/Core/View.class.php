@@ -45,8 +45,8 @@ class View
 			throw \Core\Exceptions\FileException::for_not_found($absolute_path);
 
 		//解析模板标签
-		$template = new \Core\Template\Driver\FrameTemp();
-		$content = $template->fetch($absolute_path, $this->var);
+		$template = new \Core\Template\TemplateFactory();
+		$content = $template->create()->fetch($absolute_path, $this->var);
 
 		//直接返回结果，不输出
 		if ($is_return)
@@ -80,9 +80,10 @@ class View
 		//非模块参数
 		$param_not_module = [];
 
-		foreach ($uri_segments as $item)
+		foreach ($uri_segments as $key => $item)
 		{
-			if (is_dir($dir_view . '/' . ucfirst($item)))
+			//控制器或方法
+			if (in_array($item, $route->get_module()))
 				$dir_view .= '/' . ucfirst($item);
 			else
 				$param_not_module[] = $item;

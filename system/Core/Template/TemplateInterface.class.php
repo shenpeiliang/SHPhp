@@ -14,5 +14,5 @@ interface TemplateInterface
      * @param array $template_var 模板变量
      * @return mixed
      */
-    public function fetch(string $template_path, array $template_var);
+    public function fetch(string $template_path, array $template_var): string;
 }

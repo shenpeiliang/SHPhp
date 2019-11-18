@@ -94,12 +94,10 @@ class Config
      * @param null $default
      * @return bool|mixed|null
      */
-    public function get_system_config(string $keys, $default = NULL)
+    public function get_system_config(string $keys = '', $default = NULL)
     {
         //拆分数组 保留非false值 配置项全部为小写
         $keys = array_filter(explode('.', strtolower($keys)));
-        if (empty($keys))
-            return false;
 
         //首字母大写
         $file = 'Convention';
@@ -139,23 +137,34 @@ class Config
     }
 
     /**
-     * 获取配置惯例（读取应用配置System.php，默认读取框架Convention.php配置）
+     * 获取配置惯例（读取应用配置System.php和框架Convention.php配置）
      * @param string $key 参数名 格式：参数名1.参数2...
      * 例如：template_compile_path.left
      * @return bool|mixed|null
      */
     public function get_convention_config(string $keys)
     {
-        //用户配置(优先级较高)
-        $app_config = $this->get_app_config('system.' . $keys);
-        if ($app_config)
-            return $app_config;
+        //用户配置
+        $app_config = $this->get_app_config('system');
 
         //系统配置
-        $system_config = $this->get_system_config($keys);
-        if ($system_config)
-            return $system_config;
+        $system_config = $this->get_system_config();
 
-        return false;
+        //组合
+        $config = array_merge($system_config, $app_config);
+
+        $keys = array_filter(explode('.', strtolower($keys)));
+        while ($keys) {
+            $key = array_shift($keys);
+
+            //如果不存在，直接返回默认值，不再递归
+            if (!isset($config[$key])) {
+                return false;
+            }
+
+            $config = $config[$key];
+        }
+
+        return $config;
     }
 }

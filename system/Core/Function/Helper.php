@@ -33,3 +33,4 @@ function convention_config(string $keys)
     return get_instance('\Core\Config')->get_convention_config($keys);
 
 }
+

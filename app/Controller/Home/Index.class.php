@@ -1,6 +1,7 @@
 <?php
 namespace Controller\Home;
-class Index{
+use Core\Controller;
+class Index extends Controller{
 	/**
 	 * 默认方法
 	 */
@@ -14,6 +15,10 @@ class Index{
 	 */
 	public function hello($str)
 	{
-		echo $str;
+		$this->assign('now', time());
+		$this->assign('name', 'hello');
+		$this->assign('lists', ['a', 'b', 'c', 'd']);
+
+		$this->display();
 	}
 }

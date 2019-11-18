@@ -10,4 +10,12 @@ class Index extends Controller{
 
 		$this->display();
 	}
+
+	public function smarty(){
+		$this->assign('now', time());
+		$this->assign('name', 'hello');
+		$this->assign('lists', ['a', 'b', 'c', 'd']);
+
+		$this->display();
+	}
 }

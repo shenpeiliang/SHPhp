@@ -18,7 +18,7 @@ class Frame
 		spl_autoload_register('\Core\Loader::autoload');
 
 		//加载助手文件
-		include SYSTEM_PATH . 'Core/Function/Help.php';
+		include SYSTEM_PATH . 'Core/Function/Helper.php';
 
 		//注册一个会在php中止时执行的函数
 		register_shutdown_function('\Core\Frame::fatal_error');
