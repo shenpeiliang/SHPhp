@@ -42,7 +42,8 @@ return [
 				[
 					'map' =>
 						[
-							'Core'
+							'Core' => SYSTEM_PATH . 'Core',
+							'Exception' => SYSTEM_PATH . 'Exception'
 						],
 					//被加载文件的后缀名
 					'file_suffixes' => '.class.php',

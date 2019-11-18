@@ -26,7 +26,7 @@ class Smarty implements TemplateInterface
 		$template_dir = APP_PATH . 'View/' . ucfirst(convention_config('template_theme')) . '/';
 
 		$templateFile = substr($template_path, strlen($template_dir));
-		include_once SYSTEM_PATH . 'Core/Vendor/Smarty/Smarty.class.php';
+		include_once SYSTEM_PATH . 'Vendor/Smarty/Smarty.class.php';
 		$tpl = new \Smarty();
 		$tpl->caching = convention_config('tmpl_cache_on');
 		$tpl->template_dir = $template_dir;

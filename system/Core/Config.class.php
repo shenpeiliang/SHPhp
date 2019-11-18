@@ -57,13 +57,13 @@ class Config
             //配置文件绝对路径
             $absolute_path = APP_PATH . 'Conf/' . (defined('ENVIRONMENT') ? ENVIRONMENT . '/' : '') . $file . '.php';
             if (!is_file($absolute_path))
-                throw \Core\Exceptions\FileException::for_not_found();
+                throw \Exception\FileException::for_not_found();
 
             //包含文件
             $config = include($absolute_path);
 
             if (!isset($config) || !is_array($config))
-                throw  \Core\Exceptions\FileException::for_error_param();
+                throw  \Exception\FileException::for_error_param();
 
             //配置文件的数组名为config
             self::$config['app_' . $file] = $config;
@@ -106,13 +106,13 @@ class Config
             //配置文件绝对路径
             $absolute_path = SYSTEM_PATH . 'Config/' . $file . '.php';
             if (!is_file($absolute_path))
-                throw \Core\Exceptions\FileException::for_not_found();
+                throw \Exception\FileException::for_not_found();
 
             //包含文件
             $config = include($absolute_path);
 
             if (!isset($config) || !is_array($config))
-                throw  \Core\Exceptions\FileException::for_error_param();
+                throw  \Exception\FileException::for_error_param();
 
             //配置文件的数组名为config
             self::$config['system_' . $file] = $config;

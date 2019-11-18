@@ -64,7 +64,7 @@ class Loader
 		);
 
 		if (!strncmp($_class, 'smarty_internal_', 16) || isset($_classes[$_class])) {
-			return SYSTEM_PATH . 'Core/Vendor/Smarty/sysplugins/' . $_class . '.php';
+			return SYSTEM_PATH . 'Vendor/Smarty/sysplugins/' . $_class . '.php';
 		}
 
 		return false;
@@ -91,8 +91,8 @@ class Loader
 		$vendor_dir = APP_PATH . $vendor;
 
 		//配置规则存在则覆盖
-		if (in_array($vendor, self::$psr4['map'])){
-			$vendor_dir = SYSTEM_PATH . $vendor;
+		if (array_key_exists($vendor, self::$psr4['map'])){
+			$vendor_dir = self::$psr4['map'][$vendor];
 			//文件相对路径
 			$file_path = substr($class, strlen($vendor)) . self::$psr4['file_suffixes'];
 		}

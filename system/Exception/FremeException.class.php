@@ -1,6 +1,6 @@
 <?php
-namespace Core\Exceptions;
-use Core\Exceptions\ExceptionInterface;
+namespace Exception;
+use Exception\ExceptionInterface;
 /**
  * 异常基类
  */

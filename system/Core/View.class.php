@@ -42,7 +42,7 @@ class View
 		//模板绝对路径
 		$absolute_path = $this->get_template_path($template_file);
 		if (!is_file($absolute_path))
-			throw \Core\Exceptions\FileException::for_not_found($absolute_path);
+			throw \Exception\FileException::for_not_found($absolute_path);
 
 		//解析模板标签
 		$template = new \Core\Template\TemplateFactory();

@@ -71,7 +71,7 @@ class Route
 		$config = convention_config('route');
 
 		if (empty($config))
-			throw \Core\Exceptions\AutoLoadException::for_invalid_param();
+			throw \Exception\AutoLoadException::for_invalid_param();
 
 		$this->directory = APP_PATH . 'Controller';
 		$this->class = '\\' . 'Controller' . '\\' . ucfirst($config['controller']);

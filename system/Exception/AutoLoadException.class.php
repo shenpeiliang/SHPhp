@@ -1,7 +1,7 @@
 <?php
-namespace Core\Exceptions;
-use Core\Exceptions\ExceptionInterface;
-use Core\Exceptions\FremeException;
+namespace Exception;
+use Exception\ExceptionInterface;
+use Exception\FremeException;
 /**
  * 加载异常基类
  */
