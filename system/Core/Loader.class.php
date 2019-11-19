@@ -49,6 +49,10 @@ class Loader
 	 * @param String $class
 	 */
 	private static function _parse_file_smarty(String $class){
+		//引用的Smarty库没用到命名空间
+		if(strrpos($class, '\\'))
+			return false;
+
 		$_class = strtolower($class);
 		$_classes = array(
 			'smarty_config_source' => true,

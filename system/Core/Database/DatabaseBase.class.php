@@ -6,22 +6,22 @@
  * Time: 9:38
  */
 
-namespace Core\Cache;
+namespace Core\Database;
 
 
-class CacheBase
+class DatabaseBase
 {
 	/**
 	 * 默认使用的驱动
 	 * @var string
 	 */
-	public $default_driver = 'Redis';
+	public $default_driver = 'PdoHandler';
 
 	/**
 	 * 驱动配置
 	 * @var array
 	 */
 	public $valid_drivers = [
-		'Redis' => \Core\Cache\Driver\RedisHandler::class
+		'PdoHandler' => \Core\Database\Driver\PdoHandler::class
 	];
 }
