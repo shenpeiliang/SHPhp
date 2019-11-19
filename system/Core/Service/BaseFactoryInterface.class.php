@@ -9,9 +9,5 @@
 namespace Core\Service;
 interface BaseFactoryInterface
 {
-	/**
-	 * 创建模板类驱动
-	 * @return \Core\Template\TemplateInterface
-	 */
-	public function create(): \Core\Template\TemplateInterface ;
+	public function create();
 }

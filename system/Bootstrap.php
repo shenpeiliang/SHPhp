@@ -2,6 +2,8 @@
 //系统常量定义
 defined('SYSTEM_PATH') or define('SYSTEM_PATH', __DIR__ . '/'); //框架目录
 defined('APP_DEBUG') or define('APP_DEBUG', false); // 是否调试模式
+define('IS_CLI', PHP_SAPI == 'cli' ? TRUE : FALSE);
+
 
 //类文件后缀
 const EXT = '.class.php';

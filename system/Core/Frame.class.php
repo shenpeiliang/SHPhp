@@ -20,6 +20,9 @@ class Frame
 		//加载助手文件
 		include SYSTEM_PATH . 'Function/Helper.php';
 
+		//session启动
+		new \Core\Session();
+
 		//注册一个会在php中止时执行的函数
 		register_shutdown_function('\Core\Frame::fatal_error');
 

@@ -25,7 +25,7 @@ class URI
 	{
 		//解析请求url
 		//是否是命令行模式
-		if(php_sapi_name() == 'cli' || define('STDIN'))
+		if(IS_CLI)
 			$uri = $this->_detect_cli_args();
 		else
 			$uri = $this->_detect_uri();

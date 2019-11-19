@@ -54,5 +54,23 @@ return [
 		[
 			'controller' => 'Index',
 			'method' => 'index',
-		]
+		],
+
+	//SESSION设置
+	'session' => [
+		'auto_start' => TRUE, //是否自动开启
+		'options' => [], //配置数组 支持type name id path expire domain 等参数
+		'driver' => '', //驱动，默认文件
+		'prefix' => '', //键值前缀
+		'db' => '' //指定保存的库
+	],
+
+	//Redis配置
+	'redis' => [
+		'host' => '127.0.0.1',
+		'port' => 6379,
+		'auth' => null,    //是否有用户验证，默认无密码验证。如果不是为null，则为验证密码
+		'timeout' => 0   //连接超时
+	]
+
 ];

@@ -12,7 +12,7 @@ use Core\Template\TemplateInterface;
 
 define('SMARTY_SPL_AUTOLOAD', TRUE);
 
-class Smarty implements TemplateInterface
+class SmartyHandler implements TemplateInterface
 {
 	/**
 	 * 解析模板标签

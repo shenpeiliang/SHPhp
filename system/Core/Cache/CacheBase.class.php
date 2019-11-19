@@ -6,7 +6,7 @@
  * Time: 9:38
  */
 
-namespace Core\Template;
+namespace Core\Cache;
 
 
 class TemplateBase
@@ -15,14 +15,13 @@ class TemplateBase
 	 * 默认使用的驱动
 	 * @var string
 	 */
-	public $default_driver = 'Frame';
+	public $default_driver = 'Redis';
 
 	/**
 	 * 驱动配置
 	 * @var array
 	 */
 	public $valid_drivers = [
-		'Frame' => \Core\Template\Driver\FrameHandler::class,
-		'Smarty' => \Core\Template\Driver\SmartyHandler::class
+		'Redis' => \Core\Cache\Driver\RedisHandler::class
 	];
 }

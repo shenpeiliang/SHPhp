@@ -8,7 +8,7 @@ use Core\Template\TemplateInterface;
  * 自定义模板引擎
  * Class View
  */
-class FrameTemp implements TemplateInterface
+class FrameHandler implements TemplateInterface
 {
     /**
      * 模板标签配置定义
