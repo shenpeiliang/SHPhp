@@ -11,22 +11,33 @@ namespace Core;
 
 class Model
 {
-
 	/**
 	 * model名称
 	 * @var string
 	 */
 	protected $model_name = '';
 
-	public function __construct()
+	public function __construct(string $name = '')
 	{
-		//获取Model名称
-		$this->get_model_name();
+		if ($name)
+			$this->model_name = $name;
+		else
+			$this->get_model_name(); //自动获取Model类名作为表名
 
-		//创建连接
+	}
+
+	/**
+	 * 获取数据库连接
+	 * @param string $db_group
+	 * @return mixed
+	 */
+	public function db(string $db_group = 'master')
+	{
+		//驱动
 		$driver = new \Core\Database\DatabaseFactory();
-		$driver->create();
 
+		//创建数据库操作构造器
+		return $driver->create()->get_builder($db_group);
 	}
 
 	/**

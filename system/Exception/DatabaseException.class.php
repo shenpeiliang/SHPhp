@@ -5,10 +5,19 @@ use Exception\ExceptionInterface;
 use Exception\FremeException;
 
 /**
- * 会话异常基类
+ * 异常基类
  */
-class CacheException extends FremeException implements ExceptionInterface
+class DatabaseException extends FremeException implements ExceptionInterface
 {
+	/**
+	 * 配置参数错误
+	 * @return static
+	 */
+	public static function for_invalid_param()
+	{
+		return new static('配置参数缺省');
+	}
+
 	/**
 	 * 连接错误
 	 * @return static

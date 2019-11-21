@@ -1,5 +1,7 @@
 <?php
 return [
+	'database_driver' => 'Mysql',
+
 	//主库
 	'master' => [
 		'host' => '127.0.0.1',

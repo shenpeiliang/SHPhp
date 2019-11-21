@@ -17,7 +17,7 @@ class DatabaseFactory implements BaseFactoryInterface
 	 */
 	public function create(): \Core\Database\DatabaseInterface{
 		//基本配置
-		$base = new \Core\Database\DatabaseBase();
+		$base = new \Core\Database\DatabaseConf();
 
 		//使用默认配置
 		$driver_object = $base->valid_drivers[$base->default_driver];

@@ -9,13 +9,22 @@
 namespace Core\Database;
 
 
-class DatabaseBase
+class DatabaseConf
 {
 	/**
 	 * 默认使用的驱动
 	 * @var string
 	 */
 	public $default_driver = 'PdoHandler';
+
+	/**
+	 * 数据库组配置
+	 * @var array
+	 */
+	public static $db_groups = [
+		'master',
+		'slave'
+	];
 
 	/**
 	 * 驱动配置
