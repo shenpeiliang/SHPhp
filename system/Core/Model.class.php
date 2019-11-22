@@ -37,7 +37,7 @@ class Model
 		$driver = new \Core\Database\DatabaseFactory();
 
 		//创建数据库操作构造器
-		return $driver->create()->get_builder($db_group);
+		return $driver->create()->get_builder($db_group, $this->model_name);
 	}
 
 	/**

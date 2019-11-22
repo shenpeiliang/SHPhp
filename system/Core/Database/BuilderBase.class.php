@@ -104,6 +104,12 @@ class BuilderBase
 	protected $offset = 0;
 
 	/**
+	 * 锁
+	 * @var string
+	 */
+	protected $lock = '';
+
+	/**
 	 * 更新的值
 	 * @var unknown
 	 */
@@ -139,15 +145,20 @@ class BuilderBase
 
 	/**
 	 * 初始化
-	 * @param unknown $config
+	 * BuilderBase constructor.
+	 * @param string $db_group
+	 * @param string $table
 	 */
-	public function __construct(string $db_group = 'master')
+	public function __construct(string $db_group = 'master', string $table = '')
 	{
 		//配置初始化
 		$this->init($db_group);
 
 		//连接数据库
 		$this->db_connect();
+
+		if ($table)
+			$this->table($table);
 	}
 
 	/**
@@ -232,14 +243,20 @@ class BuilderBase
 	 * 组建绑定预处理 Select
 	 * @return MysqlPdo
 	 */
-	private function _build_param():self
+	private function _bind_value_for_where():self
 	{
-		if (empty($this->param))
+		if (empty($this->where))
 			return $this;
-		foreach ($this->param as $key => $val)
+
+		$count = count($this->where);
+		for ($i = 0; $i < $count; $i++)
 		{
-			$this->statement->bindValue($key, $val);
+			if (is_array($this->where[$i]['value']))
+				$this->statement->bindValue(':' . $i . ':' . $this->where[$i]['key'], $this->where[$i]['value'][0], $this->where[$i]['value'][1]);
+			else
+				$this->statement->bindValue(':' . $i . ':' . $this->where[$i]['key'], $this->where[$i]['value']);
 		}
+
 		return $this;
 	}
 
@@ -247,7 +264,7 @@ class BuilderBase
 	 * 组建绑定预处理 Update
 	 * @return MysqlPdo
 	 */
-	private function _build_param_data():self
+	private function _bind_value_for_where_data():self
 	{
 		if (empty($this->param_data))
 			return $this;
@@ -259,17 +276,59 @@ class BuilderBase
 	}
 
 	/**
+	 * 构建查询表
+	 * @return string
+	 */
+	private function _build_table(): string
+	{
+		$table = '';
+		//去重
+		$this->from = array_unique($this->from);
+		$count = count($this->from);
+		for ($i = 0; $i < $count; $i++)
+		{
+			$fill = ($i == ($count - 1)) ? ' ' : ' , ';
+			$table .= $this->prefix . $this->from . ' AS ' . $this->from . $fill;
+		}
+
+		return $table;
+	}
+
+	/**
+	 * 构建分页查询
+	 * @return string
+	 */
+	private function _build_limit(): string
+	{
+		if (!$this->limit)
+			return '';
+
+		return ' LIMIT ' . $this->offset . ',' . $this->limit;
+	}
+
+	/**
+	 * 构建锁
+	 * @return string
+	 */
+	private function _build_lock(): string
+	{
+		return ' ' . $this->lock . ' ';
+	}
+
+	/**
 	 * 组建查询sql
 	 */
 	private function _build_select():string
 	{
-		$this->sql = 'SELECT '
-			. $this->build_field()
-			. ' FROM ' . $this->table
-			. $this->build_where()
-			. $this->build_order()
-			. $this->limit;
-		return $this->sql;
+		return 'SELECT FROM '
+		. $this->_build_having()
+		. $this->_build_table()
+		. $this->_build_where()
+		. $this->_build_order()
+		. $this->_build_group_by()
+		. $this->_build_having()
+		. $this->_build_limit()
+		. $this->_build_lock();
 	}
 
 	/**
@@ -277,11 +336,10 @@ class BuilderBase
 	 */
 	private function _build_update():string
 	{
-		$this->sql = 'UPDATE '
-			. $this->table
+		return $this->sql = 'UPDATE FROM '
+			. $this->_build_table()
 			. $this->build_set()
-			. $this->build_where();
-		return $this->sql;
+			. $this->_build_where();
 	}
 
 	/**
@@ -289,10 +347,9 @@ class BuilderBase
 	 */
 	private function _build_delete():string
 	{
-		$this->sql = 'DELETE FROM '
-			. $this->table
-			. $this->build_where();
-		return $this->sql;
+		return $this->sql = 'DELETE FROM '
+			. $this->_build_table()
+			. $this->_build_where();
 	}
 
 	/**
@@ -302,9 +359,8 @@ class BuilderBase
 	private function _build_insert():string
 	{
 		$this->sql = 'INSERT INTO '
-			. $this->table
+			. $this->_build_table()
 			. $this->build_insert();
-		return $this->sql;
 	}
 
 	/**
@@ -342,7 +398,7 @@ class BuilderBase
 	 * 构建where查询
 	 * @return string
 	 */
-	protected function build_where():string
+	protected function _build_where():string
 	{
 		if (!$this->where)
 		{
@@ -350,12 +406,122 @@ class BuilderBase
 		}
 		$where = ' WHERE ';
 		$count = count($this->where);
+
+		$where_and = [];
+		$where_or = [];
+
+		//转换 name='a' 为 name=:0:name
 		for ($i = 0; $i < $count; $i++)
 		{
-			$fill = ($i == ($count - 1)) ? ' ' : ' AND ';
-			$where .= $this->where[$i] . $fill;
+			if ($this->where[$i]['type'] != 'WHERE')
+				continue;
+
+			//默认算数符
+			$where_definition = '=';
+
+			//一个或多个空格分隔作为条件
+			$where_key = strpos('/\s+/', trim($this->where[$i]['key']));
+			if (isset($where_key[1]))
+				$where_definition = strtoupper($where_key[1]);
+
+			if ($this->where[$i]['exp'] == 'OR')
+				$where_or[] = $this->where[$i]['key'] . $where_definition . $this->_build_where_definition($where_definition, $i);
+			else
+				$where_and[] = $this->where[$i]['key'] . $where_definition . $this->_build_where_definition($where_definition, $i);
+
 		}
+
+		if ($where_and)
+			$where .= implode(' AND ', $where_and);
+
+		if ($where_or)
+			$where .= ' AND (' . implode(' OR ', $where_or) . ')';
+
 		return $where;
+	}
+
+	/**
+	 * 构造查询条件 - 预处理
+	 * @param string $where_definition
+	 * @param int $i where索引
+	 * @return string
+	 */
+	private function _build_where_definition(string $where_definition, int $i): string
+	{
+		$bind_value = $this->where[$i]['value'];
+
+		if ($where_definition == 'LIKE')
+		{
+			$match_left = $match_right = '';
+			if ($bind_value[0] == '%')
+			{
+				$bind_value = substr($bind_value, 1);
+				$match_left = '%';
+			}
+
+			if ($bind_value[mb_strlen($bind_value) - 1] == '%')
+			{
+				$bind_value = substr($bind_value, 0, -1);
+				$match_right = '%';
+			}
+
+			//修改绑定值
+			$this->where[$i]['value'] = $bind_value;
+
+			return $match_left . ':' . $i . ':' . $this->where[$i]['key'] . $match_right;
+		} elseif ($where_definition == 'IN')
+		{
+			return '(:' . $i . ':' . implode(',', $this->where[$i]['key']) . ')';
+		} else
+		{
+			return ':' . $i . ':' . $this->where[$i]['key'];
+		}
+	}
+
+	/**
+	 * 构建having查询
+	 * @return string
+	 */
+	protected function _build_having():string
+	{
+		if (!$this->where)
+		{
+			return '';
+		}
+		$having = ' HAVING ';
+		$count = count($this->where);
+
+		$having_and = [];
+		$having_or = [];
+
+		//转换 name='a' 为 name=:0:name
+		for ($i = 0; $i < $count; $i++)
+		{
+			if ($this->where[$i]['type'] != 'HAVING')
+				continue;
+
+			//默认算数符
+			$having_definition = '=';
+
+			//一个或多个空格分隔作为条件
+			$having_key = strpos('/\s+/', trim($this->where[$i]['key']));
+			if (isset($having_key[1]))
+				$having_definition = strtoupper($having_key[1]);
+
+			if ($this->where[$i]['exp'] == 'OR')
+				$having_or[] = $this->where[$i]['key'] . $having_definition . ':' . $i . ':' . $this->where[$i]['key'];
+			else
+				$having_and[] = $this->where[$i]['key'] . $having_definition . ':' . $i . ':' . $this->where[$i]['key'];
+
+		}
+
+		if ($having_and)
+			$having .= implode(' AND ', $having_and);
+
+		if ($having_or)
+			$having .= ' AND (' . implode(' OR ', $having_or) . ')';
+
+		return $having;
 	}
 
 	/**
@@ -383,41 +549,45 @@ class BuilderBase
 	}
 
 	/**
-	 * 构建order查询
+	 * 构建分组查询
 	 * @return string
 	 */
-	protected function build_field():string
+	protected function _build_group_by():string
 	{
-		if (!$this->field)
-		{
-			return '*';
-		}
-		$field = ' ';
-		$count = count($this->field);
+		if (!$this->group_by)
+			return '';
+
+		$group = ' GROUP BY ';
+		$count = count($this->group_by);
 		for ($i = 0; $i < $count; $i++)
 		{
 			$fill = ($i == ($count - 1)) ? ' ' : ' , ';
-			$field .= $this->field[$i] . $fill;
+			$group .= $this->group_by[$i] . $fill;
 		}
-		return $field;
+		return $group;
 	}
 
 	/**
 	 * 构建order查询
 	 * @return string
 	 */
-	protected function build_order():string
+	protected function _build_order():string
 	{
 		if (!$this->order)
 		{
 			return '';
 		}
 		$order = ' ORDER BY ';
-		$count = count($this->order);
+		$count = count($this->order_by);
 		for ($i = 0; $i < $count; $i++)
 		{
 			$fill = ($i == ($count - 1)) ? ' ' : ' , ';
-			$order .= $this->order[$i] . $fill;
+			if (is_array($this->order_by[$i]))
+				$order .= $this->order_by[$i][0] . $this->order_by[$i][1];
+			else
+				$order .= $this->order_by[$i];
+
+			$order .= $fill;
 		}
 		return $order;
 	}
@@ -519,10 +689,10 @@ class BuilderBase
 			return;
 
 		$this->where[] = [
-			$key,
-			$value,
-			$exp,
-			$build_type
+			'key' => $key,
+			'value' => $value,
+			'exp' => $exp,
+			'type' => $build_type
 		];
 	}
 
@@ -577,6 +747,8 @@ class BuilderBase
 	{
 		if (is_string($key))
 		{
+			$key = trim($key);
+			$value = trim($value);
 			$key = [$key => $value];
 		}
 
@@ -588,7 +760,7 @@ class BuilderBase
 
 		foreach ($key as $k => $v)
 		{
-			$this->_build_where_having('WHERE', $k, $v, $exp);
+			$this->__build_where_having('WHERE', trim($k), trim($v), $exp);
 		}
 
 		return $this;
@@ -635,6 +807,15 @@ class BuilderBase
 			$this->order_by[] = $value;
 		}
 		return $this;
+	}
+
+	/**
+	 * 加锁
+	 * @param string $lock
+	 */
+	public function lock(string $lock)
+	{
+		$this->lock = strtoupper($lock);
 	}
 
 	/**
@@ -722,7 +903,7 @@ class BuilderBase
 	 */
 	public function delete()
 	{
-		$this->_buildDelete();
+		$this->_build_delete();
 		if ($this->execute())
 		{
 			return $this->statement->rowCount();
@@ -736,7 +917,7 @@ class BuilderBase
 	 */
 	public function update()
 	{
-		$this->_buildUpdate();
+		$this->_build_update();
 		if ($this->execute())
 		{
 			return $this->statement->rowCount();
@@ -750,34 +931,33 @@ class BuilderBase
 	 */
 	public function execute(): bool
 	{
-		/*使用长连接为避免出现错误： MySQL server has gone away in 出现，在使用query前都要判断
+		try
+		{
+			/*使用长连接为避免出现错误： MySQL server has gone away in 出现，在使用query前都要判断
 		有没有连接，close之后再重新创建连接
 		*/
-		if (!$this->connection)
-		{
-			$this->close();
-			$this->db_connect();
-		}
-		if ($this->connection)
-		{
-			if (empty($this->sql))
+			if (!$this->connection)
 			{
-				return $this->_err('Error: Cannot find sql statement !<br/>');
+				$this->close();
+				$this->db_connect();
 			}
+
 			if ($this->statement = $this->connection->prepare($this->sql))
 			{
 				//预处理绑定-查询条件
-				$this->_build_param();
+				$this->_bind_value_for_where();
 
 				//预处理绑定-更新、插入
-				$this->_build_param_data();
+				$this->_bind_value_for_where_data();
 
 				//执行操作
 				return $this->statement->execute();
 			}
-			return $this->_err('Error: The prepare failure !<br/>');
+		} catch (\PDOException $e)
+		{
+			return $this->_err($e->getMessage());
 		}
-		return false;
+
 	}
 
 	/**
