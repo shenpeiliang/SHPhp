@@ -14,6 +14,7 @@ class DemoModel extends Model
     public function get()
     {
         $datas = $this->db()->where('id >', 0)->fetch_all();
+        //$datas = $this->db()->test();
 
         return $datas;
     }

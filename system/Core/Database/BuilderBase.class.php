@@ -254,9 +254,9 @@ class BuilderBase
         $count = count($this->where);
         for ($i = 0; $i < $count; $i++) {
             if (is_array($this->where[$i]['value']))
-                $this->statement->bindValue(':{' . $this->where[$i]['key'] . '_' . $i . '}', $this->where[$i]['value'][0], $this->where[$i]['value'][1]);
+                $this->statement->bindValue(':_' . $i, $this->where[$i]['value'][0], $this->where[$i]['value'][1]);
             else
-                $this->statement->bindValue(':{' . $this->where[$i]['key'] . '_' . $i . '}', $this->where[$i]['value']);
+                $this->statement->bindValue(':_' . $i, $this->where[$i]['value']);
         }
 
         return $this;
@@ -463,7 +463,7 @@ class BuilderBase
                 $where_definition = strtoupper($where_key[1]);
 
             if ($this->where[$i]['exp'] == 'OR')
-                $where_or[] = $this->where[$i]['key']  . ' ' . $this->_build_where_definition($where_definition, $i);
+                $where_or[] = $this->where[$i]['key'] . ' ' . $this->_build_where_definition($where_definition, $i);
             else
                 $where_and[] = $this->where[$i]['key'] . ' ' . $this->_build_where_definition($where_definition, $i);
 
@@ -506,7 +506,7 @@ class BuilderBase
             //修改绑定值
             $this->where[$i]['value'] = [$bind_value, \PDO::PARAM_STR];
 
-            return "'" . $match_left . ':{' . $this->where[$i]['key'] . '_' . $i . $match_right . "}'";
+            return "'" . $match_left . ':_' . $i . $match_right;
         } elseif ($where_definition == 'IN') {
             //根据数组长度替换sql参数为?
             $value = $bind_value;
@@ -517,12 +517,12 @@ class BuilderBase
             $sql = '(:';
 
             for ($j = 0; $j < count($value); $j++) {
-                $sql .= ':{' . $this->where[$i]['key'] . '_?_' . $j . (($j == count($value) - 1) ? '' : ',') . '}';
+                $sql .= ':_' . $i . '_' . $j . (($j == count($value) - 1) ? '' : ',');
             }
 
             return $sql . ')';
         } else {
-            return ':{' . $this->where[$i]['key'] . '_' . $i . '}';
+            return ':_' . $i;
         }
     }
 
@@ -862,7 +862,7 @@ class BuilderBase
     public function insert()
     {
         $this->_build_insert();
-        if ($this->execute()) {
+        if ($this->prepare()) {
             return $this->connection->lastInsertId();
         }
         return false;
@@ -875,7 +875,7 @@ class BuilderBase
     public function delete()
     {
         $this->_build_delete();
-        if ($this->execute()) {
+        if ($this->prepare()) {
             return $this->statement->rowCount();
         }
         return false;
@@ -888,7 +888,7 @@ class BuilderBase
     public function update()
     {
         $this->_build_update();
-        if ($this->execute()) {
+        if ($this->prepare()) {
             return $this->statement->rowCount();
         }
         return false;
@@ -898,7 +898,7 @@ class BuilderBase
      * 执行操作
      * @return boolean
      */
-    public function execute(): bool
+    public function prepare(): bool
     {
         try {
             /*使用长连接为避免出现错误： MySQL server has gone away in 出现，在使用query前都要判断
@@ -935,7 +935,10 @@ class BuilderBase
     public function fetch_row()
     {
         $this->_build_select();
-        if ($this->execute()) {
+        if ($this->prepare()) {
+            //预处理绑定-查询条件
+            $this->_bind_value_for_where();
+            $this->statement->execute();
             return $this->statement->fetch();
         }
         return false;
@@ -948,13 +951,11 @@ class BuilderBase
     public function fetch_all()
     {
         $this->_build_select();
-        if ($this->execute()) {
+        if ($this->prepare()) {
             //预处理绑定-查询条件
             $this->_bind_value_for_where();
-
+            $this->statement->execute();
             $data = $this->statement->fetchAll();
-
-            $this->get_statement_params();
 
             return $data;
         }
@@ -1068,5 +1069,17 @@ class BuilderBase
     public function close(): void
     {
         $this->connection = NULL;
+    }
+
+    public function test()
+    {
+        if ($sth = $this->connection->prepare(' SELECT * FROM hs_demo AS demo WHERE id > :_0')) {
+            $sth->bindValue(':_0', 0);
+            $sth->execute();
+            $data = $sth->fetchAll();
+            $sth->debugDumpParams();
+            return $data;
+        }
+
     }
 }
