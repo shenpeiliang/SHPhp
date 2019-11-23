@@ -18,4 +18,10 @@ class Index extends Controller{
 
 		$this->display();
 	}
+
+	public function table(){
+	    $mod = new \Model\DemoModel();
+
+	    var_dump($mod->get());
+    }
 }

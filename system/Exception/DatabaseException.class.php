@@ -26,4 +26,14 @@ class DatabaseException extends FremeException implements ExceptionInterface
 	{
 		return new static('系统错误，连接错误:' . print_r($e, TRUE));
 	}
+
+    /**
+     * 预查询错误
+     * @param $e
+     * @return DatabaseException
+     */
+    public static function for_statement_error($e)
+    {
+        return new static('SQL错误:' . print_r($e, TRUE));
+    }
 }
