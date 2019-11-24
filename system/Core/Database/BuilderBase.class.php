@@ -3,34 +3,9 @@
 namespace Core\Database;
 
 /**
- * @author shenpeiliang
- * 20170829
- * * 标注：此类的条件、更新使用到了预处理绑定，因此查询时要统一占位符，另更新条件中只能使用命名占位符
- * where('id = :id or sess_val = :val')
- * where(array('id = :id', 'sess_val = :val'))->bind(array(':id'=>17,':val'=>'c2'))
- * where(array('id = ?', 'sess_val = ?'))->bind(array(1=>17,2=>'c2'))
- * field('id,name') / field(array('id','name'))
- * order('id desc,expire asc') / order(array('id desc','expire asc'))
- * 更新set(array('sess_val'=>time(),'sess_key'=>30))->update()
- * 删除where(array('id = ?', 'sess_val = ?'))->bind(array(1=>17,2=>'c2'))->delete()
- * （只支持单条保存）插入set(array('sess_val'=>time(),'sess_key'=>30))->insert()
- *
- * 单例：
- * $pdo = MysqlPdo::getInstance($config);
- *
- *
- * 事务支持
- * 自动方式
- * $this->transStart();
- * ..
- * $this->transComplete();
- *
- * 手动方式
- * $this->transBegin();
- * $this->transRollback();
- * $this->transCommit();
- * Class PdoHandler
- * @package Core\Database\Driver
+ * ADO
+ * Class BuilderBase
+ * @package Core\Database
  */
 class BuilderBase
 {
@@ -159,6 +134,25 @@ class BuilderBase
     }
 
     /**
+     * 清空查询
+     */
+    private function _clear(): void
+    {
+        $this->from = [];
+        $this->field = [];
+        $this->join = [];
+        $this->where = [];
+        $this->order_by = [];
+        $this->group_by = [];
+        $this->having = [];
+        $this->limit = 0;
+        $this->offset = 0;
+        $this->lock = '';
+        $this->sql = '';
+        $this->statement = NULL;
+    }
+
+    /**
      * 配置
      */
     private function init($db_group)
@@ -253,10 +247,42 @@ class BuilderBase
 
         $count = count($this->where);
         for ($i = 0; $i < $count; $i++) {
-            if (is_array($this->where[$i]['value']))
-                $this->statement->bindValue(':_' . $i, $this->where[$i]['value'][0], $this->where[$i]['value'][1]);
-            else
-                $this->statement->bindValue(':_' . $i, $this->where[$i]['value']);
+            if($this->where[$i]['type'] != 'WHERE')
+                continue;
+
+            $value = $this->where[$i]['value'];
+            $where_definition = '=';
+
+            //一个或多个空格分隔作为条件
+            $where_key = preg_split('/\s+/', trim($this->where[$i]['key']));
+            if (isset($where_key[1]))
+                $where_definition = strtoupper($where_key[1]);
+
+            if($where_definition == 'IN'){
+                $in_value = $value;
+                $pdo_param = false;
+
+                //第二个参数是否是指定参数类型的
+                if (is_array($in_value[0])){
+                    $value = $in_value[0];
+                    $pdo_param = $in_value[1];
+                }
+
+
+                for ($j = 0; $j < count($value); $j++) {
+                    if($pdo_param)
+                        $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j], $pdo_param);
+                    else
+                        $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j]);
+                }
+
+            }else{
+                if (is_array($value))
+                    $this->statement->bindValue(':_' . $i, $value[0], $value[1]);
+                else
+                    $this->statement->bindValue(':_' . $i, $value);
+            }
+
         }
 
         return $this;
@@ -307,7 +333,7 @@ class BuilderBase
         $count = count($this->field);
         for ($i = 0; $i < $count; $i++) {
             $fill = ($i == ($count - 1)) ? ' ' : ' , ';
-            $field .= $this->$field[$i] . $fill;
+            $field .= $this->field[$i] . $fill;
         }
 
         return $field;
@@ -458,7 +484,7 @@ class BuilderBase
             $where_definition = '=';
 
             //一个或多个空格分隔作为条件
-            $where_key = strpos('/\s+/', trim($this->where[$i]['key']));
+            $where_key = preg_split('/\s+/', trim($this->where[$i]['key']));
             if (isset($where_key[1]))
                 $where_definition = strtoupper($where_key[1]);
 
@@ -514,7 +540,7 @@ class BuilderBase
             if (is_array($bind_value[0]))
                 $value = $bind_value[0];
 
-            $sql = '(:';
+            $sql = '(';
 
             for ($j = 0; $j < count($value); $j++) {
                 $sql .= ':_' . $i . '_' . $j . (($j == count($value) - 1) ? '' : ',');
@@ -612,13 +638,14 @@ class BuilderBase
      */
     public function select($value): self
     {
-        if (is_array($value)) {
-            foreach ($value as $item) {
-                $this->field[] = $item;
-            }
-        } else {
-            $this->field[] = $value;
+        if(is_string($value)){
+            $value = preg_split('/\,/', $value);
         }
+
+        foreach ($value as $item) {
+            $this->field[] = $item;
+        }
+
         return $this;
     }
 
@@ -667,10 +694,10 @@ class BuilderBase
      * 结构 [key,value,exp(and/or),type(where/having)]
      * @param string $build_type
      * @param string $key
-     * @param string $value
+     * @param mix $value
      * @param string $exp
      */
-    private function _build_where_having(string $build_type, string $key, string $value, string $exp): void
+    private function _build_where_having(string $build_type, string $key, $value, string $exp): void
     {
         $build_type = strtoupper($build_type);
         if (!in_array($build_type, ['WHERE', 'HAVING']))
@@ -725,15 +752,18 @@ class BuilderBase
      *  where(['id in' => [10,30,33,22,12]])
      *  where(['name' => 'hello', 'name' => 'world'], '', 'OR')
      * @param string $key name = %s ['name' => ]
-     * @param string $value
+     * @param string $key
+     * @param $value
      * @param string $exp
      * @return BuilderBase
      */
-    public function where(string $key, string $value = '', string $exp = 'AND'): self
+    public function where(string $key, $value, string $exp = 'AND'): self
     {
+        if(is_string($value))
+            $value = trim($value);
+
         if (is_string($key)) {
             $key = trim($key);
-            $value = trim($value);
             $key = [$key => $value];
         }
 
@@ -744,7 +774,9 @@ class BuilderBase
             $exp = 'AND';
 
         foreach ($key as $k => $v) {
-            $this->_build_where_having('WHERE', trim($k), trim($v), $exp);
+            if(is_string($v))
+                $v = trim($v);
+            $this->_build_where_having('WHERE', trim($k), $v, $exp);
         }
 
         return $this;
@@ -939,7 +971,11 @@ class BuilderBase
             //预处理绑定-查询条件
             $this->_bind_value_for_where();
             $this->statement->execute();
-            return $this->statement->fetch();
+            $data = $this->statement->fetch();
+            //清空查询条件
+            $this->_clear();
+
+            return $data;
         }
         return false;
     }
@@ -956,6 +992,9 @@ class BuilderBase
             $this->_bind_value_for_where();
             $this->statement->execute();
             $data = $this->statement->fetchAll();
+
+            //清空查询条件
+            $this->_clear();
 
             return $data;
         }
@@ -1070,6 +1109,7 @@ class BuilderBase
     {
         $this->connection = NULL;
     }
+
 
     public function test()
     {
