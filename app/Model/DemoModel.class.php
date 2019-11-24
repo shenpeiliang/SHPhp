@@ -20,7 +20,8 @@ class DemoModel extends Model
         //$datas = $this->db()->where('id in', [1,3])->fetch_all();
 
         //指定类型
-        $datas = $this->db()->select('id,title')->where('id in', [[1,3], \PDO::PARAM_INT])->fetch_all();
+        //$datas = $this->db()->select('id,title')->where('id in', [[1,3], \PDO::PARAM_INT])->fetch_all();
+        $datas = $this->db()->select(['id','title'])->where('id in', [[1,3], \PDO::PARAM_INT])->fetch_all();
 
 
 

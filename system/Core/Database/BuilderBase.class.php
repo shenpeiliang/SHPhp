@@ -809,13 +809,14 @@ class BuilderBase
      */
     public function order($value): self
     {
-        if (is_array($value)) {
-            foreach ($value as $key => $item) {
-                $this->order_by[] = $key . ' ' . strtoupper($item);
-            }
-        } else {
-            $this->order_by[] = $value;
+        if(is_string($value)){
+            $value = preg_split('/\,/', $value);
         }
+
+        foreach ($value as $key => $item) {
+            $this->order_by[] = $key . ' ' . strtoupper($item);
+        }
+
         return $this;
     }
 
@@ -830,22 +831,16 @@ class BuilderBase
 
     /**
      * 分组
-     * @param string $by
+     * @param mix $value
      * @return BuilderBase
      */
-    public function group_by(string $by): self
+    public function group_by($value): self
     {
-        if (is_string($by)) {
-            if (strpos($by, ',')) {
-                $by = explode(',', $by);
-                array_filter($by);
-            } else {
-                $by = [$by];
-            }
-
+        if(is_string($value)){
+            $value = preg_split('/\,/', $value);
         }
 
-        foreach ($by as $item) {
+        foreach ($value as $item) {
             $this->group_by[] = $item;
         }
 
