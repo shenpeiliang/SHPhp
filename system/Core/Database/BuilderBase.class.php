@@ -56,11 +56,6 @@ class BuilderBase
      */
     protected $group_by = [];
 
-    /**
-     * 分组查询
-     * @var array
-     */
-    protected $having = [];
 
     /**
      * 结果数
@@ -144,7 +139,6 @@ class BuilderBase
         $this->where = [];
         $this->order_by = [];
         $this->group_by = [];
-        $this->having = [];
         $this->limit = 0;
         $this->offset = 0;
         $this->lock = '';
@@ -247,9 +241,6 @@ class BuilderBase
 
         $count = count($this->where);
         for ($i = 0; $i < $count; $i++) {
-            if($this->where[$i]['type'] != 'WHERE')
-                continue;
-
             $value = $this->where[$i]['value'];
             $where_definition = '=';
 
@@ -258,25 +249,25 @@ class BuilderBase
             if (isset($where_key[1]))
                 $where_definition = strtoupper($where_key[1]);
 
-            if($where_definition == 'IN'){
+            if ($where_definition == 'IN') {
                 $in_value = $value;
                 $pdo_param = false;
 
                 //第二个参数是否是指定参数类型的
-                if (is_array($in_value[0])){
+                if (is_array($in_value[0])) {
                     $value = $in_value[0];
                     $pdo_param = $in_value[1];
                 }
 
 
                 for ($j = 0; $j < count($value); $j++) {
-                    if($pdo_param)
+                    if ($pdo_param)
                         $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j], $pdo_param);
                     else
                         $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j]);
                 }
 
-            }else{
+            } else {
                 if (is_array($value))
                     $this->statement->bindValue(':_' . $i, $value[0], $value[1]);
                 else
@@ -371,12 +362,11 @@ class BuilderBase
         $this->sql = 'SELECT '
             . $this->_build_field()
             . ' FROM '
-            . $this->_build_having()
             . $this->_build_table()
             . $this->_build_where()
-            . $this->_build_order()
             . $this->_build_group_by()
             . $this->_build_having()
+            . $this->_build_order()
             . $this->_build_limit()
             . $this->_build_lock();
     }
@@ -599,7 +589,7 @@ class BuilderBase
      */
     protected function _build_order(): string
     {
-        if (!$this->order) {
+        if (!$this->order_by) {
             return '';
         }
         $order = ' ORDER BY ';
@@ -638,7 +628,7 @@ class BuilderBase
      */
     public function select($value): self
     {
-        if(is_string($value)){
+        if (is_string($value)) {
             $value = preg_split('/\,/', $value);
         }
 
@@ -720,11 +710,11 @@ class BuilderBase
      *  having(['id in' => [10,30,33,22,12]])
      *  having(['name' => 'hello', 'name' => 'world'], '', 'OR')
      * @param string $key name = %s ['name' => ]
-     * @param string $value
+     * @param $value
      * @param string $exp
      * @return BuilderBase
      */
-    public function having(string $key, string $value = '', string $exp = 'AND'): self
+    public function having(string $key, $value = '', string $exp = 'AND'): self
     {
         if (is_string($key)) {
             $key = [$key => $value];
@@ -759,7 +749,7 @@ class BuilderBase
      */
     public function where(string $key, $value, string $exp = 'AND'): self
     {
-        if(is_string($value))
+        if (is_string($value))
             $value = trim($value);
 
         if (is_string($key)) {
@@ -774,7 +764,7 @@ class BuilderBase
             $exp = 'AND';
 
         foreach ($key as $k => $v) {
-            if(is_string($v))
+            if (is_string($v))
                 $v = trim($v);
             $this->_build_where_having('WHERE', trim($k), $v, $exp);
         }
@@ -784,7 +774,8 @@ class BuilderBase
 
     /**
      * 查询条件
-     * @param $value array
+     * @param array $value
+     * @return BuilderBase
      */
     public function bind(array $value): self
     {
@@ -809,13 +800,18 @@ class BuilderBase
      */
     public function order($value): self
     {
-        if(is_string($value)){
+        if (is_string($value)) {
             $value = preg_split('/\,/', $value);
+            foreach ($value as $item) {
+                $this->order_by[] = trim($item);
+            }
+        } else {
+            foreach ($value as $key => $item) {
+                $this->order_by[] = trim($key) . ' ' . trim($item);
+            }
+
         }
 
-        foreach ($value as $key => $item) {
-            $this->order_by[] = $key . ' ' . strtoupper($item);
-        }
 
         return $this;
     }
@@ -836,7 +832,7 @@ class BuilderBase
      */
     public function group_by($value): self
     {
-        if(is_string($value)){
+        if (is_string($value)) {
             $value = preg_split('/\,/', $value);
         }
 
@@ -884,7 +880,8 @@ class BuilderBase
 
     /**
      * 新增数据
-     * @return boolean|int
+     * @return bool
+     * @throws \Exception\DatabaseException
      */
     public function insert()
     {
@@ -897,7 +894,8 @@ class BuilderBase
 
     /**
      * 删除数据
-     * @return boolean|int
+     * @return bool
+     * @throws \Exception\DatabaseException
      */
     public function delete()
     {
@@ -910,7 +908,8 @@ class BuilderBase
 
     /**
      * 更新操作
-     * @return boolean|int
+     * @return bool
+     * @throws \Exception\DatabaseException
      */
     public function update()
     {
@@ -922,8 +921,9 @@ class BuilderBase
     }
 
     /**
-     * 执行操作
-     * @return boolean
+     * 执行预处理操作
+     * @return bool
+     * @throws \Exception\DatabaseException
      */
     public function prepare(): bool
     {
@@ -957,43 +957,61 @@ class BuilderBase
 
     /**
      * 返回结果数据（一维关联数据）
-     * @return Ambigous <multitype:, mixed>|boolean
+     * @return bool
+     * @throws \Exception\DatabaseException
      */
     public function fetch_row()
     {
-        $this->_build_select();
-        if ($this->prepare()) {
-            //预处理绑定-查询条件
-            $this->_bind_value_for_where();
-            $this->statement->execute();
-            $data = $this->statement->fetch();
+        try {
+            $this->_build_select();
+            if ($this->prepare()) {
+                //预处理绑定-查询条件
+                $this->_bind_value_for_where();
+                $this->statement->execute();
+                $data = $this->statement->fetch();
+
+
+                return $data;
+            }
+            return false;
+        } catch (\PDOException $e) {
+            throw \Exception\DatabaseException::for_statement_error($e);
+            return false;
+        } finally {
             //清空查询条件
             $this->_clear();
-
-            return $data;
         }
-        return false;
+
     }
 
     /**
      * 返回结果数据（一维关联数据）
-     * @return Ambigous <multitype:, mixed>|boolean
+     * @return bool
+     * @throws \Exception\DatabaseException
      */
     public function fetch_all()
     {
-        $this->_build_select();
-        if ($this->prepare()) {
-            //预处理绑定-查询条件
-            $this->_bind_value_for_where();
-            $this->statement->execute();
-            $data = $this->statement->fetchAll();
+        try {
+            $this->_build_select();
+            if ($this->prepare()) {
+                //预处理绑定-查询条件
+                $this->_bind_value_for_where();
+                $this->statement->execute();
+                $data = $this->statement->fetchAll();
 
+                //清空查询条件
+                $this->_clear();
+
+                return $data;
+            }
+            return false;
+        } catch (\PDOException $e) {
+            throw \Exception\DatabaseException::for_statement_error($e);
+            return false;
+        } finally {
             //清空查询条件
             $this->_clear();
-
-            return $data;
         }
-        return false;
     }
 
     /**

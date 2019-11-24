@@ -21,7 +21,21 @@ class DemoModel extends Model
 
         //指定类型
         //$datas = $this->db()->select('id,title')->where('id in', [[1,3], \PDO::PARAM_INT])->fetch_all();
-        $datas = $this->db()->select(['id','title'])->where('id in', [[1,3], \PDO::PARAM_INT])->fetch_all();
+
+
+        /*$datas = $this->db()->select(['id','title'])
+            ->where('id in', [[1,3], \PDO::PARAM_INT])
+            ->group_by('title')
+            ->having('id >', 0)
+            //->order('id desc')
+            ->order(['id' => 'desc'])
+            ->fetch_all();*/
+
+        //获取一条记录
+        $datas = $this->db()->select(['id','title'])
+            ->where('id in', [[1,3], \PDO::PARAM_INT])
+            ->order(['id' => 'desc'])
+            ->fetch_row();
 
 
 
