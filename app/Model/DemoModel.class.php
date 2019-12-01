@@ -31,13 +31,31 @@ class DemoModel extends Model
             ->order(['id' => 'desc'])
             ->fetch_all();*/
 
+        $db = $this->db();
+
+        /*$datas = $db->select(['id','title'])
+            ->where('title like', '%ell%')
+            ->order(['id' => 'desc'])
+            ->fetch_all();*/
+
+        $datas = $db->select(['id','title'])
+            ->where('title like', ['%ell%', '%es%'], 'OR')
+            ->order(['id' => 'desc'])
+            ->fetch_all();
+
+        /*$datas = $db->select(['id','title'])
+            ->where('id >', [0, \PDO::PARAM_INT])
+            ->where('title', ['hello', 'tes1'], 'or')
+            ->order(['id' => 'desc'])
+            ->fetch_all();*/
+
         //获取一条记录
-        $datas = $this->db()->select(['id','title'])
+        /*$datas = $this->db()->select(['id','title'])
             ->where('id in', [[1,3], \PDO::PARAM_INT])
             ->order(['id' => 'desc'])
-            ->fetch_row();
+            ->fetch_row();*/
 
-
+        $db->dump_statement_params();
 
         //$datas = $this->db()->test();
 

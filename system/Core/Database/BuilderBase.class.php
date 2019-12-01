@@ -143,7 +143,6 @@ class BuilderBase
         $this->offset = 0;
         $this->lock = '';
         $this->sql = '';
-        $this->statement = NULL;
     }
 
     /**
@@ -231,7 +230,7 @@ class BuilderBase
     }
 
     /**
-     * 组建绑定预处理 Select
+     * 组建绑定预处理
      * @return MysqlPdo
      */
     private function _bind_value_for_where(): self
@@ -241,42 +240,108 @@ class BuilderBase
 
         $count = count($this->where);
         for ($i = 0; $i < $count; $i++) {
-            $value = $this->where[$i]['value'];
-            $where_definition = '=';
-
-            //一个或多个空格分隔作为条件
-            $where_key = preg_split('/\s+/', trim($this->where[$i]['key']));
-            if (isset($where_key[1]))
-                $where_definition = strtoupper($where_key[1]);
-
-            if ($where_definition == 'IN') {
-                $in_value = $value;
-                $pdo_param = false;
-
-                //第二个参数是否是指定参数类型的
-                if (is_array($in_value[0])) {
-                    $value = $in_value[0];
-                    $pdo_param = $in_value[1];
-                }
-
-
-                for ($j = 0; $j < count($value); $j++) {
-                    if ($pdo_param)
-                        $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j], $pdo_param);
-                    else
-                        $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j]);
-                }
-
-            } else {
-                if (is_array($value))
-                    $this->statement->bindValue(':_' . $i, $value[0], $value[1]);
-                else
-                    $this->statement->bindValue(':_' . $i, $value);
-            }
-
+            if ($this->where[$i]['exp'] == 'OR')
+                $this->_bind_value_for_where_or($i);
+            else
+                $this->_bind_value_for_where_and($i);
         }
 
         return $this;
+    }
+
+    /**
+     * 组建绑定预处理 or
+     * @param $i
+     */
+    private function _bind_value_for_where_or($i): void
+    {
+        $value = $this->where[$i]['value'];
+        $where_definition = '=';
+
+        //一个或多个空格分隔作为条件
+        $where_key = preg_split('/\s+/', trim($this->where[$i]['key']));
+        if (isset($where_key[1]))
+            $where_definition = strtoupper($where_key[1]);
+
+        if ($where_definition == 'IN') {
+            $in_value = $value;
+            $pdo_param = false;
+
+            //第二个参数是否是指定参数类型的
+            if (is_array($in_value[0])) {
+                $value = $in_value[0];
+                $pdo_param = $in_value[1];
+            }
+
+            for ($j = 0; $j < count($value); $j++) {
+                if ($pdo_param)
+                    $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j], $pdo_param);
+                else
+                    $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j]);
+            }
+
+        } elseif ($where_definition == 'LIKE') {
+            for ($j = 0; $j < count($value); $j++) {
+                $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j], \PDO::PARAM_STR);
+            }
+        } else {
+            for ($j = 0; $j < count($value); $j++) {
+                $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j]);
+            }
+        }
+    }
+
+    /**
+     * 组建绑定预处理 and
+     * @param $i
+     */
+    private function _bind_value_for_where_and($i): void
+    {
+        $value = $this->where[$i]['value'];
+        $where_definition = '=';
+
+        //一个或多个空格分隔作为条件
+        $where_key = preg_split('/\s+/', trim($this->where[$i]['key']));
+        if (isset($where_key[1]))
+            $where_definition = strtoupper($where_key[1]);
+
+        if ($where_definition == 'IN') {
+            $in_value = $value;
+            $pdo_param = false;
+
+            //第二个参数是否是指定参数类型的
+            if (is_array($in_value[0])) {
+                $value = $in_value[0];
+                $pdo_param = $in_value[1];
+            }
+
+            for ($j = 0; $j < count($value); $j++) {
+                if ($pdo_param)
+                    $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j], $pdo_param);
+                else
+                    $this->statement->bindValue(':_' . $i . '_' . $j, $value[$j]);
+            }
+
+        } elseif ($where_definition == 'LIKE') {
+            $match_left = $match_right = '';
+            if ($value[0] == '%') {
+                $value = substr($value, 1);
+                $match_left = '%';
+            }
+
+            if ($value[mb_strlen($value) - 1] == '%') {
+                $value = substr($value, 0, -1);
+                $match_right = '%';
+            }
+
+            $this->statement->bindValue(':_' . $i, $match_left . $value . $match_right, \PDO::PARAM_STR);
+
+        } else {
+            if (is_array($value))
+                $this->statement->bindValue(':_' . $i, $value[0], $value[1]);
+            else
+                $this->statement->bindValue(':_' . $i, $value);
+        }
     }
 
     /**
@@ -462,8 +527,7 @@ class BuilderBase
         $where = '';
         $count = count($this->where);
 
-        $where_and = [];
-        $where_or = [];
+        $where_and = $where_or = [];
 
         //转换 name='a' 为 name=:0:name
         for ($i = 0; $i < $count; $i++) {
@@ -479,9 +543,9 @@ class BuilderBase
                 $where_definition = strtoupper($where_key[1]);
 
             if ($this->where[$i]['exp'] == 'OR')
-                $where_or[] = $this->where[$i]['key'] . ' ' . $this->_build_where_definition($where_definition, $i);
+                $where_or[] = $this->_build_where_definition_or($where_definition, $i);
             else
-                $where_and[] = $this->where[$i]['key'] . ' ' . $this->_build_where_definition($where_definition, $i);
+                $where_and[] = $this->where[$i]['key'] . ' ' . $this->_build_where_definition_and($where_definition, $i);
 
         }
 
@@ -489,7 +553,7 @@ class BuilderBase
             $where .= implode(' AND ', $where_and);
 
         if ($where_or)
-            $where .= ' AND (' . implode(' OR ', $where_or) . ')';
+            $where .= ($where_and ? ' AND ' : '') . implode(' AND ', $where_or);
 
         if ($where)
             $where = ' ' . strtoupper($type) . ' ' . $where;
@@ -498,32 +562,61 @@ class BuilderBase
     }
 
     /**
-     * 构造查询预处理
+     * 构造查询预处理 或关系
      * @param string $where_definition
      * @param int $i where索引
      * @return string
      */
-    private function _build_where_definition(string $where_definition, int $i): string
+    private function _build_where_definition_or(string $where_definition, int $i): string
     {
+        //一个条件中包含多个选项值
         $bind_value = $this->where[$i]['value'];
 
         if ($where_definition == 'LIKE') {
-            $match_left = $match_right = '';
-            if ($bind_value[0] == '%') {
-                $bind_value = substr($bind_value, 1);
-                $match_left = '%';
+            $sql = '(';
+            for ($j = 0; $j < count($bind_value); $j++) {
+                $sql .= $this->where[$i]['key']  . ' :_' . $i . '_' . $j .  (($j == count($bind_value) - 1) ? '' : ' OR ');
             }
-
-            if ($bind_value[mb_strlen($bind_value) - 1] == '%') {
-                $bind_value = substr($bind_value, 0, -1);
-                $match_right = '%';
-            }
-
-            //修改绑定值
-            $this->where[$i]['value'] = [$bind_value, \PDO::PARAM_STR];
-
-            return "'" . $match_left . ':_' . $i . $match_right;
+            $sql .= ')';
         } elseif ($where_definition == 'IN') {
+            $sql = '(';
+            for ($j = 0; $j < count($bind_value); $j++) {
+                //根据数组长度替换sql参数为?
+                $value = $bind_value[$j];
+                //第二个参数是否是指定参数类型的
+                if (is_array($value[0]))
+                    $value = $value[0];
+
+                $sql .= $this->where[$i]['key'] . '(:_';
+                for ($k = 0; $k < count($value); $k++) {
+                    $sql .= $i . '_' . $j . '_' . $k . (($k == count($value) - 1) ? '' : ',');
+                }
+
+                $sql .= ")" . (($j == count($bind_value) - 1) ? '' : ' OR ');
+            }
+
+            $sql .= ')';
+        } else {
+            $sql = '(';
+            for ($j = 0; $j < count($bind_value); $j++) {
+                $sql .= $this->where[$i]['key'] . '=' . ':_' . $i . '_' . $j . (($j == count($bind_value) - 1) ? '' : ' OR ');
+            }
+            $sql .= ')';
+        }
+        return $sql;
+    }
+
+    /**
+     * 构造查询预处理 并关系
+     * @param string $where_definition
+     * @param int $i where索引
+     * @return string
+     */
+    private function _build_where_definition_and(string $where_definition, int $i): string
+    {
+        $bind_value = $this->where[$i]['value'];
+
+        if ($where_definition == 'IN') {
             //根据数组长度替换sql参数为?
             $value = $bind_value;
             //第二个参数是否是指定参数类型的
@@ -950,7 +1043,7 @@ class BuilderBase
     /**
      * 打印 SQL 预处理命令
      */
-    public function get_statement_params(): void
+    public function dump_statement_params(): void
     {
         $this->statement->debugDumpParams();
     }
@@ -969,7 +1062,6 @@ class BuilderBase
                 $this->_bind_value_for_where();
                 $this->statement->execute();
                 $data = $this->statement->fetch();
-
 
                 return $data;
             }
@@ -998,9 +1090,6 @@ class BuilderBase
                 $this->_bind_value_for_where();
                 $this->statement->execute();
                 $data = $this->statement->fetchAll();
-
-                //清空查询条件
-                $this->_clear();
 
                 return $data;
             }
