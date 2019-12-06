@@ -14,6 +14,12 @@ class BuilderBase
 	private $db_config = []; //数据库配置
 
 	/**
+	 * 是否开启调试
+	 * @var bool
+	 */
+	private $debug = FALSE;
+
+	/**
 	 * 查询字段
 	 * @var array
 	 */
@@ -93,18 +99,6 @@ class BuilderBase
 	protected $param = [];
 
 	/**
-	 * 事务状态
-	 * @var unknown
-	 */
-	protected $trans_status = TRUE;
-
-	/**
-	 * 记录当前事务是否回滚
-	 * @var unknown
-	 */
-	protected $rollbacked = FALSE;
-
-	/**
 	 * 事务嵌套级别
 	 * @var unknown
 	 */
@@ -129,6 +123,16 @@ class BuilderBase
 	}
 
 	/**
+	 * 开启调试，输出预处理参数
+	 * @return BuilderBase
+	 */
+	public function set_debug(): self
+	{
+		$this->debug = TRUE;
+		return $this;
+	}
+
+	/**
 	 * 清空查询
 	 */
 	private function _clear(): void
@@ -143,6 +147,12 @@ class BuilderBase
 		$this->offset = 0;
 		$this->lock = '';
 		$this->sql = '';
+
+		//是否开启调试
+		if($this->debug)
+			$this->_dump_statement_params();
+
+		$this->statement = NULL;
 	}
 
 	/**
@@ -235,7 +245,7 @@ class BuilderBase
 	 * 组建绑定预处理
 	 * @return MysqlPdo
 	 */
-	private function _bind_value_for_where(): self
+	private function _bind_value(): self
 	{
 		if (empty($this->where))
 			return $this;
@@ -244,9 +254,9 @@ class BuilderBase
 		for ($i = 0; $i < $count; $i++)
 		{
 			if ($this->where[$i]['exp'] == 'OR')
-				$this->_bind_value_for_where_or($i);
+				$this->_bind_value_or($i);
 			else
-				$this->_bind_value_for_where_and($i);
+				$this->_bind_value_and($i);
 		}
 
 		return $this;
@@ -256,7 +266,7 @@ class BuilderBase
 	 * 组建绑定预处理 or
 	 * @param $i
 	 */
-	private function _bind_value_for_where_or($i): void
+	private function _bind_value_or($i): void
 	{
 		$value = $this->where[$i]['value'];
 		$where_definition = '=';
@@ -312,7 +322,7 @@ class BuilderBase
 	 * 组建绑定预处理 and
 	 * @param $i
 	 */
-	private function _bind_value_for_where_and($i): void
+	private function _bind_value_and($i): void
 	{
 		$value = $this->where[$i]['value'];
 		$where_definition = '=';
@@ -344,20 +354,7 @@ class BuilderBase
 
 		} elseif ($where_definition == 'LIKE')
 		{
-			$match_left = $match_right = '';
-			if ($value[0] == '%')
-			{
-				$value = substr($value, 1);
-				$match_left = '%';
-			}
-
-			if ($value[mb_strlen($value) - 1] == '%')
-			{
-				$value = substr($value, 0, -1);
-				$match_right = '%';
-			}
-
-			$this->statement->bindValue(':_' . $i, $match_left . $value . $match_right, \PDO::PARAM_STR);
+			$this->statement->bindValue(':_' . $i, $value, \PDO::PARAM_STR);
 
 		} else
 		{
@@ -1148,9 +1145,40 @@ class BuilderBase
 	/**
 	 * 打印 SQL 预处理命令
 	 */
-	public function dump_statement_params(): void
+	private function _dump_statement_params(): void
 	{
 		$this->statement->debugDumpParams();
+	}
+
+	/**
+	 *  SQL查询
+	 * $model->query('select * from user where id=%d and status=%d',$id,$status);
+	 * @param string $sql
+	 * @param array ...$args
+	 * @return BuilderBase
+	 */
+	public function query(string $sql, ...$args): self{
+		//https://www.runoob.com/php/func-string-printf.html
+		//?问号占位符  %.2f匹配符 :name命名占位符
+
+		//foreach开始标签
+		$pattern = '#((\?)|(:{1}[a-zA-Z_\x7f-\xff]{1}[a-zA-Z_\x7f-\xff\s\-\,:\|\#"\'=]*)|(%{1}[a-zA-Z\.\d]))#is';
+
+		preg_match_all($pattern, $sql, $matches);
+		//构造sql
+
+		return $this;
+	}
+
+	/**
+	 * 获取数据
+	 * @return BuilderBase
+	 */
+	public function get(): self
+	{
+		//构建查询SQL
+		$this->_build_select();
+		return $this;
 	}
 
 	/**
@@ -1162,11 +1190,10 @@ class BuilderBase
 	{
 		try
 		{
-			$this->_build_select();
 			if ($this->prepare())
 			{
 				//预处理绑定-查询条件
-				$this->_bind_value_for_where();
+				$this->_bind_value();
 				$this->statement->execute();
 				$data = $this->statement->fetch();
 
@@ -1194,11 +1221,10 @@ class BuilderBase
 	{
 		try
 		{
-			$this->_build_select();
 			if ($this->prepare())
 			{
 				//预处理绑定-查询条件
-				$this->_bind_value_for_where();
+				$this->_bind_value();
 				$this->statement->execute();
 				$data = $this->statement->fetchAll();
 
@@ -1217,93 +1243,78 @@ class BuilderBase
 	}
 
 	/**
-	 * 事务状态
-	 * @return unknown
+	 * 获取事务当前的嵌套级别
+	 * @return int
 	 */
-	public function trans_status(): bool
+	public function get_trans_depth(): int
 	{
-		return $this->trans_status;
+		return $this->trans_depth;
 	}
 
 	/**
-	 * 事务开启-自动
-	 * @return MysqlPdo
-	 */
-	public function trans_start()
-	{
-		$this->connection->beginTransaction();
-	}
-
-	/**
-	 * 事务提交 -自动
-	 * @return MysqlPdo
-	 */
-	public function trans_complete(): bool
-	{
-		if ($this->trans_status === FALSE)
-		{
-			$this->connection->rollBack();
-			return false;
-		}
-		$this->connection->commit();
-		return true;
-	}
-
-	/**
-	 * 开启事务 - 手动
+	 * 开启事务
 	 * @return boolean
 	 */
 	public function trans_begin(): bool
 	{
-		if ($this->trans_depth++ > 0)
+		try
 		{
+			//嵌套开启
+			if ($this->trans_depth++ > 0)
+				return true;
+
+			$this->connection->setAttribute(PDO::ATTR_AUTOCOMMIT, FALSE);
+			$this->connection->beginTransaction();
 			return true;
+		} catch (\PDOException $e)
+		{
+			throw \Exception\DatabaseException::for_statement_error($e);
+			return false;
 		}
-		$this->connection->setAttribute(PDO::ATTR_AUTOCOMMIT, FALSE);
-		$this->connection->beginTransaction();
-		return true;
 	}
 
 	/**
-	 * 事务回滚 - 手动
+	 * 事务回滚
 	 * @return boolean
 	 */
 	public function trans_rollback(): bool
 	{
-		if (--$this->trans_depth > 0)
+		try
 		{
-			$this->rollbacked = TRUE;
+			//嵌套回滚
+			if (--$this->trans_depth > 0)
+				return true;
+
+			$this->connection->rollBack();
+			$this->connection->setAttribute(PDO::ATTR_AUTOCOMMIT, TRUE);
 			return true;
+		} catch (\PDOException $e)
+		{
+			throw \Exception\DatabaseException::for_statement_error($e);
+			return false;
 		}
-		$this->connection->rollBack();
-		$this->rollbacked = FALSE;
-		$this->connection->setAttribute(PDO::ATTR_AUTOCOMMIT, TRUE);
-		return true;
 	}
 
 	/**
-	 * 提交事务 - 手动
+	 * 提交事务
 	 * @return boolean
 	 */
 	public function trans_commit(): bool
 	{
-		if (--$this->trans_depth > 0)
+		try
 		{
-			$this->rollbacked = TRUE;
-			return true;
-		}
-		if ($this->rollbacked)
-		{
-			$this->connection->rollBack();
-			$result = FALSE;
-		} else
-		{
+			//嵌套提交
+			if (--$this->trans_depth > 0)
+				return true;
+
 			$this->connection->commit();
-			$result = TRUE;
+			$this->connection->setAttribute(PDO::ATTR_AUTOCOMMIT, TRUE);
+			return true;
+		} catch (\PDOException $e)
+		{
+			throw \Exception\DatabaseException::for_statement_error($e);
+			return false;
 		}
-		$this->rollbacked = FALSE;
-		$this->connection->setAttribute(PDO::ATTR_AUTOCOMMIT, TRUE);
-		return $result;
 	}
 
 	/**
