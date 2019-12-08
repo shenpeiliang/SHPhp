@@ -53,12 +53,15 @@ class DemoModel extends Model
              ->get()
             ->fetch_all();*/
 
-        $datas = $db->select(['demo.id','demo.title'])
+        /*$datas = $db->select(['demo.id','demo.title'])
             ->table('demo')
             ->join('demo_copy', 'demo_copy.demo_id=demo.id')
             ->where('demo.id in', [[1, 2], [2, 4]], 'or')
             ->order(['demo.id' => 'desc'])
             ->get()
+            ->fetch_all();*/
+
+        $datas = $db->query('select * from ' . $db->get_table_prefix() . 'demo where title=%s and id in(?)', 'hello', [[1,2,3], 'in', \PDO::PARAM_INT])
             ->fetch_all();
 
         //获取一条记录
