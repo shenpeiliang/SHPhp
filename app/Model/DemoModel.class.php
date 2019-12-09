@@ -74,7 +74,10 @@ class DemoModel extends Model
         //$ret = $db->where('id in', [4,5])->where(['title' => 'java'])->delete();
 
         //更新
-        $ret = $db->where('id in', [4,5])->where(['title' => 'tes1'])->data(['dateline' => time()])->update();
+        //$ret = $db->where('id in', [4,5])->where(['title' => 'tes1'])->data(['dateline' => time()])->update();
+
+        $ret = $db->execute('update ' . $db->get_table_prefix() . 'demo set dateline = ? where title=%s and id in(?)', time(), 'hello', [[1,2,3], 'in', \PDO::PARAM_INT]);
+
 
         return $ret;
 

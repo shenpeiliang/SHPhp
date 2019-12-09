@@ -1250,6 +1250,100 @@ class BuilderBase
 	}
 
 	/**
+	 * SQL操作
+	 * @param string $sql
+	 * @param array ...$params 其中参数格式：值 [值, IN, 类型]
+	 * @return $this|bool
+	 * @throws \Exception
+	 */
+	public function execute(string $sql, ...$params)
+	{
+		try
+		{
+			//绑定预处理开启
+			$this->is_bind_param = TRUE;
+
+			//https://www.runoob.com/php/func-string-printf.html
+			//?问号占位符  %.2f匹配符 :name命名占位符
+
+			$pattern = '#((\?)|(:{1}[a-zA-Z_\x7f-\xff]{1}[a-zA-Z_\x7f-\xff\s\-\,:\|\#"\'=]*)|(%{1}[a-zA-Z\.\d]+))#is';
+
+			$num = preg_match_all($pattern, $sql, $matches);
+
+			//原生SQL
+			if (!$num)
+			{
+				$this->sql = $sql;
+				return $this;
+			}
+
+			//绑定模式需要指定参数个数一致
+			if (count($params) != $num)
+			{
+				throw new \Exception('绑定参数个数错误');
+				return false;
+			}
+
+			//构建SQL
+			$k = 0;
+			$this->sql = preg_replace_callback($pattern, function ($match) use (&$k)
+			{
+				return ':_' . $k++;
+			}, $sql);
+
+			//预处理绑定-查询条件
+			foreach ($params as $key => $param)
+			{
+				if ($matches[$key][0] == '%')
+				{ //格式化值
+					$param = sprintf($matches[$key], $param);
+				}
+
+				if (isset($param[1]) && strtoupper($param[1]) == 'IN')
+				{
+					if (is_string($param[0]))
+						$param[0] = [$param[0]];
+
+					//替换文本
+					$str_replace = '';
+					for ($i = 0; $i < count($param[0]); $i++)
+					{
+						$str_replace .= ':_' . $key . '_' . $i . (($i == count($param[0]) - 1) ? '' : ',');
+						$this->param[':_' . $key . '_' . $i] = $param;
+					}
+					$this->sql = str_replace(':_' . $key, $str_replace, $this->sql);
+				} else
+				{
+					$this->param[':_' . $key] = $param;
+				}
+
+			}
+
+			//预处理
+			if ($this->prepare())
+			{
+				//预处理绑定-查询条件
+				$this->_bind_value();
+
+				//预处理绑定-更新数据
+				$this->_bind_param();
+
+				$this->statement->execute();
+				return $this->statement->rowCount();
+			}
+		} catch (\PDOException $e)
+		{
+			throw \Exception\DatabaseException::for_statement_error($e);
+			return false;
+		} finally
+		{
+			//清空查询条件
+			$this->_clear();
+		}
+
+	}
+
+	/**
 	 * 绑定数据
 	 * @param array $params
 	 * @return BuilderBase
@@ -1487,19 +1581,5 @@ class BuilderBase
 	public function close(): void
 	{
 		$this->connection = NULL;
-	}
-
-
-	public function test()
-	{
-		if ($sth = $this->connection->prepare(' SELECT * FROM hs_demo AS demo WHERE id > :_0'))
-		{
-			$sth->bindValue(':_0', 0);
-			$sth->execute();
-			$data = $sth->fetchAll();
-			$sth->debugDumpParams();
-			return $data;
-		}
-
 	}
 }
