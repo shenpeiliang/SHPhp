@@ -71,7 +71,10 @@ class DemoModel extends Model
 
         //删除
         //$ret = $db->where(['id' => 7])->delete();
-        $ret = $db->where('id in', [4,5])->where(['title' => 'java'])->delete();
+        //$ret = $db->where('id in', [4,5])->where(['title' => 'java'])->delete();
+
+        //更新
+        $ret = $db->where('id in', [4,5])->where(['title' => 'tes1'])->data(['dateline' => time()])->update();
 
         return $ret;
 
