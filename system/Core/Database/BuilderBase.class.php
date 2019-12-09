@@ -365,7 +365,7 @@ class BuilderBase
         $count = count($this->from);
         for ($i = 0; $i < $count; $i++) {
             $fill = ($i == ($count - 1)) ? ' ' : ' , ';
-            $table .= $this->db_config['prefix'] . strtolower($this->from[$i]) . ' AS ' . strtolower($this->from[$i]) . $fill;
+            $table .= $this->db_config['prefix'] . strtolower($this->from[$i]) . ( !$this->is_bind_param ? ' AS ' . strtolower($this->from[$i]) : '' )  . $fill;
         }
 
         return $table;
@@ -470,6 +470,7 @@ class BuilderBase
      */
     private function _build_delete(): void
     {
+	    $this->is_bind_param = TRUE;
         $this->sql = 'DELETE FROM '
             . $this->_build_table()
             . $this->_build_where();
@@ -480,36 +481,35 @@ class BuilderBase
      */
     private function _build_insert(): void
     {
+	    $this->is_bind_param = TRUE;
         $this->sql = 'INSERT INTO '
             . $this->_build_table()
-            . $this->build_insert();
+            . $this->_build_insert_data();
     }
 
     /**
      * 构建插入sql
      * @return string
      */
-    protected function build_insert(): string
+    protected function _build_insert_data(): string
     {
-        if (!$this->data) {
-            return false;
-        }
+        if (!$this->param)
+	        return '';
+
         $insert = ' ( ';
-        $count = count($this->data);
+        $count = count($this->param);
         $i = 0;
         //字段名
         $insert_key = '';
         //字段值
         $insert_val = '';
-        foreach ($this->data as $key => $value) {
+        foreach ($this->param as $key => $value) {
             $fill = ($i == ($count - 1)) ? ' ' : ' , ';
-            $insert_key .= ' ' . $key . $fill;
-            $insert_val .= ' :' . $key . $fill;
-            //绑定预处理
-            $this->param [':' . $key] = $value;
+            $insert_key .= substr($key, 2) . $fill;
+            $insert_val .= $key . $fill;
             $i++;
         }
-        $insert .= $insert_key . ' ) VALUE (' . $insert_val;
+        $insert .= $insert_key . ' ) VALUE ( ' . $insert_val;
         $insert .= ' ) ';
         return $insert;
     }
@@ -649,7 +649,7 @@ class BuilderBase
 
             return $sql . ')';
         } else {
-            return ':_' . $i;
+            return ' = :_' . $i;
         }
     }
 
@@ -865,7 +865,7 @@ class BuilderBase
      * @param string $exp
      * @return BuilderBase
      */
-    public function where(string $key, $value, string $exp = 'AND'): self
+    public function where($key, $value = '', string $exp = 'AND'): self
     {
         if (is_string($value))
             $value = trim($value);
@@ -985,11 +985,21 @@ class BuilderBase
     public function insert(array $data = [], string $table = '')
     {
         try {
-            if ($table)
-                $this->table($table);
+            if ($table){
+	            $this->from = [];
+	            $this->table($table);
+            }
 
+	        if($data)
+		        $this->data($data);
+
+	        //构建SQL
             $this->_build_insert();
             if ($this->prepare()) {
+	            //预处理绑定-查询条件
+	            $this->_bind_param();
+
+	            $this->statement->execute();
                 return $this->connection->lastInsertId();
             }
             return false;
@@ -1008,11 +1018,18 @@ class BuilderBase
     public function delete(string $table = '')
     {
         try {
-            if ($table)
-                $this->table($table);
+	        if ($table){
+		        $this->from = [];
+		        $this->table($table);
+	        }
 
+	        //构建SQL
             $this->_build_delete();
             if ($this->prepare()) {
+	            //预处理绑定-查询条件
+	            $this->_bind_value();
+
+	            $this->statement->execute();
                 return $this->statement->rowCount();
             }
             return false;
@@ -1082,7 +1099,7 @@ class BuilderBase
     public function query(string $sql, ...$params): self
     {
         //绑定预处理开启
-        $this->is_bind_param = true;
+        $this->is_bind_param = TRUE;
 
         //https://www.runoob.com/php/func-string-printf.html
         //?问号占位符  %.2f匹配符 :name命名占位符
@@ -1142,13 +1159,12 @@ class BuilderBase
      */
     public function data(array $params): self
     {
-        if (empty($params))
-            return $this;
-
         // 结构 [key => [value,where_type(in),type(pdo类型)]
         foreach ($params as $key => $param) {
             $this->param[':_' . $key] = $param;
         }
+
+	    return $this;
     }
 
     /**

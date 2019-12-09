@@ -61,8 +61,19 @@ class DemoModel extends Model
             ->get()
             ->fetch_all();*/
 
-        $datas = $db->query('select * from ' . $db->get_table_prefix() . 'demo where title=%s and id in(?)', 'hello', [[1,2,3], 'in', \PDO::PARAM_INT])
-            ->fetch_all();
+        /*$datas = $db->query('select * from ' . $db->get_table_prefix() . 'demo where title=%s and id in(?)', 'hello', [[1,2,3], 'in', \PDO::PARAM_INT])
+            ->fetch_all();*/
+
+        //新增
+        //$ret = $db->data(['title' => 'php', 'dateline' => time()])->insert();
+        //$ret = $db->insert(['title' => 'php', 'dateline' => time()]);
+        //$ret = $db->insert(['title' => 'php', 'dateline' => time()], 'demo_copy');
+
+        //删除
+        //$ret = $db->where(['id' => 7])->delete();
+        $ret = $db->where('id in', [4,5])->where(['title' => 'java'])->delete();
+
+        return $ret;
 
         //获取一条记录
        /* /*$datas = $this->db()->select(['id','title'])
