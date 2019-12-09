@@ -19,12 +19,14 @@ class TemplateFactory implements BaseFactoryInterface
 		//基本配置
 		$template_base = new \Core\Template\TemplateBase();
 		//使用默认配置
-		$template_driver_object = $template_base->valid_drivers[$template_base->default_driver];
+		$template_driver = $template_base->default_driver;
 
 		//配置文件中是否有配置
-		$template_driver = convention_config('template_driver');
-		if($template_driver && array_key_exists($template_driver, $template_base->valid_drivers))
-			$template_driver_object = $template_base->valid_drivers[$template_driver];
+		$template_driver_config = convention_config('template_driver');
+		if($template_driver_config && array_key_exists($template_driver_config, $template_base->valid_drivers))
+			$template_driver = $template_driver_config;
+
+		$template_driver_object = $template_base->valid_drivers[$template_driver];
 
 		return new $template_driver_object();
 	}
