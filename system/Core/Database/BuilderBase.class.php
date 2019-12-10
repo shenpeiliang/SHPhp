@@ -3,8 +3,8 @@
 namespace Core\Database;
 
 /**
- * ADO
  * Class BuilderBase
+ * User: shenpeiliang
  * @package Core\Database
  */
 class BuilderBase

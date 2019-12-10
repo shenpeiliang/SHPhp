@@ -5,35 +5,44 @@ return [
 	//页面缓存
 	'http_cache_control' => 'private',
 
+	//模板引擎配置项
+	'template_option' => [
+		'smarty' => [ // smarty引擎
+			'suffix' => '.html', //模板文件后缀名
+			'delimiter' => '_', //模板文件命名规则 控制器_方法
+			'tmpl_cache_on' => true, //是否开启模板编译缓存,设为false则每次都会重新编译
+			'tmpl_engine_config' => [ //标签
+				'left_delimiter' => '<{',
+				'right_delimiter' => '}>'
+			],
+			'template_compile_path' => SRC_PATH . 'Runtimes/', //模板编译文件保存地址
+		],
+		'frame' => [ //框架自定义引擎
+			'suffix' => '.html',
+			'delimiter' => '_',
+			'template_compile_path' => SRC_PATH . 'Runtimes/', //模板编译文件保存地址
+			'template_tag' => [ //模板引擎解析标签
+				//插件标签
+				'taglib_begin' => '<',
+				'taglib_end' => '>',
+				//变量标签
+				'tmpl_l_delim' => '<{',
+				'tmpl_r_delim' => '}>',
+			],
+		],
+		'origin' => [ //php原生
+			'suffix' => '.php',
+			'delimiter' => '_',
+		],
+	],
 
-	//模板文件名分隔符
-	'template_delimiter' => '_',
-	//模板文件后缀
-	'template_suffix' => '.html',
+	//使用的模板引擎，默认框架自定义引擎
+	//'template_driver' => '',
+
 	//模板主题
 	'template_theme' => 'default',
-	//模板编译文件保存地址
-	'template_compile_path' => SRC_PATH . 'Runtimes/',
 
-	//模板引擎
-	//'template_driver' => 'Smarty',
-	'tmpl_cache_on' => true,        //Smarty是否开启模板编译缓存,设为false则每次都会重新编译
 
-	//模板引擎解析标签
-	'template_tag' =>
-		[
-			//插件标签
-			'taglib_begin' => '<',
-			'taglib_end' => '>',
-			//变量标签
-			'tmpl_l_delim' => '<{',
-			'tmpl_r_delim' => '}>',
-		],
-	//smarty模板引擎配置
-	'tmpl_engine_config' => [
-		'left_delimiter' => '<{',
-		'right_delimiter' => '}>'
-	],
 	//自动加载
 	'loader' =>
 		[

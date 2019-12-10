@@ -7,7 +7,7 @@ namespace Core;
  */
 class Controller
 {
-	protected $view = NULL;
+	public $view = NULL;
 
 	function __construct()
 	{
@@ -21,7 +21,7 @@ class Controller
      * @param $value
      * @return $this
      */
-	protected function assign(string $name, $value)
+	protected function assign(string $name, $value = '')
 	{
 		$this->view->assign($name, $value);
 		return $this;
@@ -30,15 +30,23 @@ class Controller
 	/**
 	 * 模板内容输出
 	 * @param string $template_file
+	 * @param array $data 模板变量
 	 * @param bool $is_return
-	 * @return string
+	 * @return mixed|string
+	 * @throws \Exception\FileException
 	 */
-	protected function display(string $template_file = '', $is_return = FALSE)
+	protected function display(string $template_file = '', array $data = [], bool $is_return = FALSE)
 	{
+		//模板变量
+		if($data)
+			$this->assign($data);
+
 		//直接返回结果，不输出
 		if ($is_return)
 			return $this->view->display($template_file, $is_return);
 
 		$this->view->display($template_file, $is_return);
 	}
+
+
 }

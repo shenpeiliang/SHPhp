@@ -15,7 +15,7 @@ class TemplateBase
 	 * 默认使用的驱动
 	 * @var string
 	 */
-	public $default_driver = 'Frame';
+	public static $default_driver = 'Frame';
 
 	/**
 	 * 驱动配置
@@ -23,6 +23,7 @@ class TemplateBase
 	 */
 	public $valid_drivers = [
 		'Frame' => \Core\Template\Driver\FrameHandler::class,
-		'Smarty' => \Core\Template\Driver\SmartyHandler::class
+		'Smarty' => \Core\Template\Driver\SmartyHandler::class,
+		'Origin' => \Core\Template\Driver\OriginHandler::class
 	];
 }

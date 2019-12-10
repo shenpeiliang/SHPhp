@@ -14,7 +14,7 @@ class FremeException extends \Exception implements ExceptionInterface {
 
 		if(APP_DEBUG){
 			//直接输出到调试页面
-			echo $error;
+			var_dump($error['message']);
 		}else{
 			//只显示错误页
 

@@ -8,11 +8,12 @@
 
 namespace Core\Template\Driver;
 
+use Core\Template\BaseHandle;
 use Core\Template\TemplateInterface;
 
 define('SMARTY_SPL_AUTOLOAD', TRUE);
 
-class SmartyHandler implements TemplateInterface
+class SmartyHandler extends BaseHandle implements TemplateInterface
 {
 	/**
 	 * 解析模板标签
@@ -28,13 +29,13 @@ class SmartyHandler implements TemplateInterface
 		$templateFile = substr($template_path, strlen($template_dir));
 		include_once SYSTEM_PATH . 'Vendor/Smarty/Smarty.class.php';
 		$tpl = new \Smarty();
-		$tpl->caching = convention_config('tmpl_cache_on');
+		$tpl->caching = convention_config('template_option.smarty.tmpl_cache_on');
 		$tpl->template_dir = $template_dir;
-		$tpl->compile_dir = convention_config('template_compile_path');
-		$tpl->cache_dir = convention_config('template_compile_path');
+		$tpl->compile_dir = convention_config('template_option.smarty.template_compile_path');
+		$tpl->cache_dir = convention_config('template_option.smarty.template_compile_path');
 		if (convention_config('tmpl_engine_config'))
 		{
-			$config = convention_config('tmpl_engine_config');
+			$config = convention_config('template_option.smarty.tmpl_engine_config');
 			foreach ($config as $key => $val)
 			{
 				$tpl->{$key} = $val;
