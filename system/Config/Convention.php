@@ -99,4 +99,12 @@ return [
 		'CURLOPT_CONNECTTIMEOUT_MS' => 5000, //连接超时时间 毫秒 默认5秒
 	],
 
+	//cookie配置
+	'cookie' => [
+		'expire' => 0,
+		'path' => '/',
+		'domain' => '',
+		'secure' => FALSE, //是否仅仅通过安全的 HTTPS 连接传给客户端
+		'httponly' => TRUE,
+	]
 ];

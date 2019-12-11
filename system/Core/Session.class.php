@@ -17,6 +17,9 @@ class Session
 		$this->_init();
 	}
 
+	/**
+	 * 初始化
+	 */
 	private function _init(): void
 	{
 		$config = convention_config('session');
