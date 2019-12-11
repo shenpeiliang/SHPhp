@@ -80,6 +80,23 @@ return [
 		'port' => 6379,
 		'auth' => null,    //是否有用户验证，默认无密码验证。如果不是为null，则为验证密码
 		'timeout' => 0   //连接超时
-	]
+	],
+	//jsonp处理函数名
+	'jsonp_handler' => 'callback',
+
+	//curl选项配置
+	'curl_option' => [
+		'CURLOPT_RETURNTRANSFER' => TRUE, //将curl_exec()获取的信息以字符串返回，而不是直接输出。
+		'CURLOPT_HEADER' => TRUE, //将头文件的信息作为数据流输出
+		'CURLOPT_FRESH_CONNECT' => TRUE, //强制获取一个新的连接，而不是缓存中的连接
+		'CURLOPT_FOLLOWLOCATION' => TRUE, //允许重定向
+		'' => '', //
+
+		'CURLOPT_CAINFO' => '', //证书地址
+		'CURLOPT_SSL_VERIFYPEER' => FALSE, //是否需要验证证书
+
+		'CURLOPT_TIMEOUT_MS' => 10000, //允许的执行时间 毫秒 默认10秒
+		'CURLOPT_CONNECTTIMEOUT_MS' => 5000, //连接超时时间 毫秒 默认5秒
+	],
 
 ];

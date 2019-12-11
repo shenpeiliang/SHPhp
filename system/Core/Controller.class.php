@@ -7,12 +7,32 @@ namespace Core;
  */
 class Controller
 {
+	/**
+	 * 视图对象
+	 * @var View|null
+	 */
 	public $view = NULL;
+
+	/**
+	 * 响应处理对象
+	 * @var View|null
+	 */
+	public $response = NULL;
+
+	/**
+	 * 请求处理对象
+	 * @var View|null
+	 */
+	public $request = NULL;
 
 	function __construct()
 	{
 		//模板对象
 		$this->view = new \Core\View();
+
+		$this->response = new \Core\Http\Response();
+
+		$this->request = new \Core\Http\Request();
 	}
 
     /**
