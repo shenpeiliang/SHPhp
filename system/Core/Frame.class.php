@@ -29,9 +29,9 @@ class Frame
 		//设置用户自定义的错误处理函数
 		set_error_handler('\Core\Frame::fatal_error');
 
-		//设置用户自定义的异常处理函数 swoole不支持set_exception_handler异常处理
-		//必须在回调函数中进行try/catch捕获异常，否则会导致工作进程退出
-		//set_exception_handler('\Core\Frame::appException');
+		//设置用户自定义的异常处理函数
+		// 注意swoole不支持set_exception_handler异常处理，必须在回调函数中进行try/catch捕获异常，否则会导致工作进程退出
+		//暂不处理set_exception_handler('\Core\Frame::fatal_error');
 
 		//路由处理
 		$route = new \Core\Route();

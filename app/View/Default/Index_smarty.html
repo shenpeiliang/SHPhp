@@ -4,7 +4,7 @@
     <br/>
     <br/>
     条件：
-<{if $name}>
+<{if $name eq "hello"}>
     <p>is true</p>
 <{else}>
     <p>is false</p>
@@ -13,6 +13,5 @@
 <p><{$key}> => <{$v}></p>
 <{/foreach}>
 
-<!--<{include file="smarty/section.html"}>-->
 
 <{include file="footer.html"}>

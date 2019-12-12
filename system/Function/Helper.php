@@ -72,7 +72,7 @@ function remove_xss($var)
 	static $_parser = null;
 	if ($_parser === null)
 	{
-		require_once SRC_PATH . 'system/Vendor/htmlpurifier/HTMLPurifier.includes.php';
+		require_once SRC_PATH.'vendor/autoload.php';
 		$config = HTMLPurifier_Config::createDefault();
 		$_parser = new HTMLPurifier ($config);
 	}
@@ -87,5 +87,15 @@ function remove_xss($var)
 		$var = $_parser->purify($var);
 	}
 	return $var;
+}
+
+/**
+ * 更优于var_dump的打印方式
+ * @param $data
+ */
+function debug_dump($data)
+{
+	require_once SRC_PATH.'vendor/autoload.php';
+	dump($data);
 }
 
