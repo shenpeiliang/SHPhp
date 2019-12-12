@@ -31,7 +31,8 @@
 
 
 ### 开发文档
-[开发文档](https://github.com/shenpeiliang/shenPhp/tree/master/doc)
+
+[开发文档](https://github.com/shenpeiliang/shenPhp/blob/master/doc/README.md)
 
 
 ### 学习交流
