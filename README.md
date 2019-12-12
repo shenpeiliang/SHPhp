@@ -24,6 +24,12 @@
 
 - 提供了Redis缓存、多种模板引擎、Mysql数据库PDO
 
+
+### 目录结构
+
+![image](https://github.com/shenpeiliang/shenPhp/blob/master/doc/1.png)
+
+
 ### 学习交流
 
 - QQ : 674894243
