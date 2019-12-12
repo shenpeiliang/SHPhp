@@ -42,4 +42,4 @@
 
 欢迎有兴趣的小伙伴加入！
 
-![image](https://avatars1.githubusercontent.com/u/40852310?s=96&v=4)
+![image](https://avatars3.githubusercontent.com/u/40852310?s=40&v=4)
