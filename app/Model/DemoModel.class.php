@@ -6,6 +6,7 @@ use Core\Model;
 
 class DemoModel extends Model
 {
+    //表名称定义，默认使用模型名作为表明
     public function __construct(string $name = '')
     {
         parent::__construct($name);
@@ -13,17 +14,25 @@ class DemoModel extends Model
 
     public function get()
     {
+        //默认使用master配置
+        $db = $this->db();
+
+        //$db_slave = $this->db('slave');
+
         //普通查询
-        //$datas = $this->db()->where('id >', 0)->get()->fetch_all();
+        //$datas = $db->where('id >', 0)->get()->fetch_all();
 
         //普通值类型
-        //$datas = $this->db()->where('id in', [1,3])->get()->fetch_all();
+        //$datas = $db->where('id in', [1,3])->get()->fetch_all();
 
         //指定类型
-        //$datas = $this->db()->select('id,title')->where('id in', [[1,3], \PDO::PARAM_INT])->get()->fetch_all();
+        //$datas = $db->select('id,title')->where('id in', [[1,3], \PDO::PARAM_INT])->get()->fetch_all();
+
+        //还可以调试输出
+        //$datas = $db->set_debug()->select('id,title')->where('id in', [[1,3], \PDO::PARAM_INT])->get()->fetch_all();
 
 
-        /*$datas = $this->db()->select(['id','title'])
+        /*$datas = $db->select(['id','title'])
             ->where('id in', [[1,3], \PDO::PARAM_INT])
             ->group_by('title')
             ->having('id >', 0)
@@ -32,7 +41,7 @@ class DemoModel extends Model
              ->get()
             ->fetch_all();*/
 
-        $db = $this->db();
+
 
         /*$datas = $db->select(['id','title'])
             ->where('title like', '%ell%')
@@ -87,9 +96,6 @@ class DemoModel extends Model
             ->order(['id' => 'desc'])
             ->get()
             ->fetch_row();*/
-
-
-        //$datas = $this->db()->test();
 
         return $datas;
     }

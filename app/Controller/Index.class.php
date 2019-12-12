@@ -5,23 +5,24 @@ use Core\Controller;
 class Index extends Controller{
 
 	public function index(){
-        $this->assign('now', time());
 		$this->assign('name', 'hello');
 		$this->assign('lists', ['a', 'b', 'c', 'd']);
 
-		/*
-		 $data = [
-			'name' => 'hello'
-		];
-		//打印调试
-		debug_dump($this);
+		//表单获取
+		$this->request->post('name', '', 'htmlspecialchars');
+		$this->request->post('remark', '', 'trim,remove_xss');
 
-		//安全过滤
-		echo remove_xss("sdfdsf<script type='text/javascript'>alert('哦哦');</script>");
+		//ajax返回
+		$data = ['success' => 'ok', 'msg' => 'NO problem'];
+		$this->response->json($data);
 
-		*/
+		//打印调试 使用第三方扩展symfony/var-dumper
+		debug_dump($data);
 
+		//模板赋值
+		$this->assign('now', time());
 
+		//模板输出
 		$this->display();
 	}
 
