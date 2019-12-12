@@ -31,8 +31,7 @@
 
 
 ### 开发文档
-
-[开发文档]（https://github.com/shenpeiliang/shenPhp/blob）
+[开发文档](https://github.com/shenpeiliang/shenPhp/blob)
 
 
 ### 学习交流
