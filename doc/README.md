@@ -143,7 +143,7 @@ class DemoModel extends Model
 
 ```
 
-- 暂不知ORM，以后会添加
+- 暂不支持ORM，以后会添加
 
 
 ### DAO
