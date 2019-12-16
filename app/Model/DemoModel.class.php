@@ -49,20 +49,20 @@ class DemoModel extends Model
             ->get()
             ->fetch_all();*/
 
-       /* $datas = $db->select(['id','title'])
+        /*$datas = $db->select(['id','title'])
+            ->where('id >', [0, \PDO::PARAM_INT])
+            ->where('title', ['hello', 'tes1'], 'or')
+            ->order(['id' => 'desc'])
+            ->get()
+            ->fetch_all();*/
+
+      /* $datas = $db->select(['id','title'])
             ->where('title like', ['%ell%', '%es%'], 'OR')
             ->order(['id' => 'desc'])
              ->get()
             ->fetch_all();*/
 
-       /* $datas = $db->select(['id','title'])
-            ->where('id >', [0, \PDO::PARAM_INT])
-            ->where('id', ['hello', 'tes1'], 'or')
-            ->order(['id' => 'desc'])
-             ->get()
-            ->fetch_all();*/
-
-        /*$datas = $db->select(['demo.id','demo.title'])
+       /* $datas = $db->select(['demo.id','demo.title'])
             ->table('demo')
             ->join('demo_copy', 'demo_copy.demo_id=demo.id')
             ->where('demo.id in', [[1, 2], [2, 4]], 'or')
@@ -72,6 +72,8 @@ class DemoModel extends Model
 
         /*$datas = $db->query('select * from ' . $db->get_table_prefix() . 'demo where title=%s and id in(?)', 'hello', [[1,2,3], 'in', \PDO::PARAM_INT])
             ->fetch_all();*/
+
+        //debug_dump($datas);
 
         //新增
         //$ret = $db->data(['title' => 'php', 'dateline' => time()])->insert();
@@ -86,7 +88,6 @@ class DemoModel extends Model
         //$ret = $db->where('id in', [4,5])->where(['title' => 'tes1'])->data(['dateline' => time()])->update();
 
         $ret = $db->execute('update ' . $db->get_table_prefix() . 'demo set dateline = ? where title=%s and id in(?)', time(), 'hello', [[1,2,3], 'in', \PDO::PARAM_INT]);
-
 
         return $ret;
 

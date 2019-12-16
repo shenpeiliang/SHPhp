@@ -42,7 +42,7 @@ class BuilderBase
 	 * 查询条件
 	 * 结构 [key,value,exp(and/or),type(where/having)
 	 * key为字符串，可以是  ? %d :name
-	 * value可以为字符串或数组，格式为val=>type， type可以是pdo类型参数，默认为空 如：[3 => \PDO::PARAM_INT]
+	 * value可以为字符串或数组，格式为[value,type]， type可以是pdo类型参数，默认为空 如：[3 => \PDO::PARAM_INT]
 	 * exp关系字符串 and in 等
 	 * where('num >', $num)
 	 * where('num in', $num)
@@ -283,27 +283,25 @@ class BuilderBase
 
 		if ($where_definition == 'IN')
 		{
-			$pdo_param = false;
-
 			for ($j = 0; $j < count($value); $j++)
 			{
-
 				//第二个参数是否是指定参数类型的
 				if (is_array($value[$j][0]))
 				{
-					$value = $value[$j][0];
-					$pdo_param = $value[$j][1];
+					$bind_val = $value[$j][0];
+					if (isset($value[$j][1]))
+						$pdo_param = $value[$j][1];
+					else
+						$pdo_param = $this->pdo_param_type($bind_val[0]); //绑定数据类型
 				} else
 				{
 					$bind_val = $value[$j];
+					$pdo_param = $this->pdo_param_type($bind_val[0]); //绑定数据类型
 				}
 
 				for ($k = 0; $k < count($bind_val); $k++)
 				{
-					if ($pdo_param)
-						$this->statement->bindValue(':_' . $i . '_' . $j . '_' . $k, $bind_val[$k], $pdo_param);
-					else
-						$this->statement->bindValue(':_' . $i . '_' . $j . '_' . $k, $bind_val[$k]);
+					$this->statement->bindValue(':_' . $i . '_' . $j . '_' . $k, $bind_val[$k], $pdo_param);
 				}
 
 			}
@@ -316,9 +314,23 @@ class BuilderBase
 			}
 		} else
 		{
-			for ($j = 0; $j < count($value); $j++)
+			//绑定类型
+			//第二个参数是否是指定参数类型的
+			if (is_array($value[0]))
 			{
-				$this->statement->bindValue(':_' . $i . '_' . $j, $value[$j]);
+				$bind_value = $value[0];
+				if (isset($value[1]))
+					$pdo_param = $value[1];
+				else
+					$pdo_param = $this->pdo_param_type($bind_value[0]); //绑定数据类型
+			} else
+			{
+				$bind_value = $value;
+				$pdo_param = $this->pdo_param_type($bind_value[0]); //绑定数据类型
+			}
+			for ($j = 0; $j < count($bind_value); $j++)
+			{
+				$this->statement->bindValue(':_' . $i . '_' . $j, $bind_value[$j], $pdo_param);
 			}
 		}
 	}
@@ -337,36 +349,32 @@ class BuilderBase
 		if (isset($where_key[1]))
 			$where_definition = strtoupper($where_key[1]);
 
+		//绑定类型
+		//第二个参数是否是指定参数类型的
+		if (is_array($value[0]))
+		{
+			$bind_value = $value[0];
+			if (isset($value[1]))
+				$pdo_param = $value[1];
+			else
+				$pdo_param = $this->pdo_param_type($bind_value[0]); //绑定数据类型
+		} else
+		{
+			$bind_value = $value;
+			$pdo_param = $this->pdo_param_type($bind_value); //绑定数据类型
+		}
+
 		if ($where_definition == 'IN')
 		{
-			$in_value = $value;
-			$pdo_param = false;
-
-			//第二个参数是否是指定参数类型的
-			if (is_array($in_value[0]))
+			for ($j = 0; $j < count($bind_value); $j++)
 			{
-				$value = $in_value[0];
-				$pdo_param = $in_value[1];
+				$this->statement->bindValue(':_' . $i . '_' . $j, $bind_value[$j], $pdo_param);
 			}
-
-			for ($j = 0; $j < count($value); $j++)
-			{
-				if ($pdo_param)
-					$this->statement->bindValue(':_' . $i . '_' . $j, $value[$j], $pdo_param);
-				else
-					$this->statement->bindValue(':_' . $i . '_' . $j, $value[$j]);
-			}
-
-		} elseif ($where_definition == 'LIKE')
-		{
-			$this->statement->bindValue(':_' . $i, $value, \PDO::PARAM_STR);
 
 		} else
 		{
-			if (is_array($value))
-				$this->statement->bindValue(':_' . $i, $value[0], $value[1]);
-			else
-				$this->statement->bindValue(':_' . $i, $value);
+			$this->statement->bindValue(':_' . $i, $bind_value, $pdo_param);
+
 		}
 	}
 
@@ -1371,30 +1379,56 @@ class BuilderBase
 
 		foreach ($this->param as $key => $item)
 		{
-			//绑定类型
-			$data_type = \PDO::PARAM_STR;
-
 			//是否是IN
 			if (is_array($item) && isset($item[1]) && strtoupper($item[1]) == 'IN')
 			{
-				//绑定类型
-				if (isset($item[2]))
-					$data_type = $item[2];
-
 				if (is_string($item[0]))
 					$item[0] = [$item[0]];
 
 				$item_index = substr($key, -1);
+
+				//绑定类型
+				if (isset($item[2]))
+				{
+					$data_type = $item[2];
+				} else
+				{ //根据值来判断类型
+					$data_type = $this->pdo_param_type($item[0][$item_index]);
+				}
+
 				$this->statement->bindValue($key, $item[0][$item_index], $data_type);
 
 			} else
 			{
+				//绑定数据类型
+				$data_type = $this->pdo_param_type($item);
+
 				$this->statement->bindValue($key, $item, $data_type);
 			}
 
 		}
 
 		return $this;
+	}
+
+	/**
+	 * 获得值的pdo类型
+	 *
+	 * @param unknown $value
+	 * @return number
+	 */
+	public function pdo_param_type($value)
+	{
+		if (is_int($value))
+			return \PDO::PARAM_INT;
+
+		if (is_bool($value))
+			return \PDO::PARAM_BOOL;
+
+		if (is_null($value))
+			return \PDO::PARAM_NULL;
+
+		return \PDO::PARAM_STR;
 	}
 
 	/**
