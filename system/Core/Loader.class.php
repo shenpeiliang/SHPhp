@@ -45,46 +45,12 @@ class Loader
 	}
 
 	/**
-	 * 自动加载Smarty
-	 * @param String $class
-	 */
-	private static function _parse_file_smarty(String $class){
-		//引用的Smarty库没用到命名空间
-		if(strrpos($class, '\\'))
-			return false;
-
-		$_class = strtolower($class);
-		$_classes = array(
-			'smarty_config_source' => true,
-			'smarty_config_compiled' => true,
-			'smarty_security' => true,
-			'smarty_cacheresource' => true,
-			'smarty_cacheresource_custom' => true,
-			'smarty_cacheresource_keyvaluestore' => true,
-			'smarty_resource' => true,
-			'smarty_resource_custom' => true,
-			'smarty_resource_uncompiled' => true,
-			'smarty_resource_recompiled' => true,
-		);
-
-		if (!strncmp($_class, 'smarty_internal_', 16) || isset($_classes[$_class])) {
-			return SYSTEM_PATH . 'Vendor/Smarty/sysplugins/' . $_class . '.php';
-		}
-
-		return false;
-	}
-
-	/**
 	 * 解析文件路径
 	 * @param String $class
 	 * @return String
 	 */
 	private static function _parse_file(String $class): String
 	{
-		//是否是smarty加载
-		if($file = self::_parse_file_smarty($class))
-			return $file;
-
 		//顶级命名空间
 		$vendor = substr($class, 0, strpos($class, '\\'));
 
