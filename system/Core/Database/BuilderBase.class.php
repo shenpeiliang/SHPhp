@@ -710,6 +710,9 @@ class BuilderBase
 			}
 
 			return $sql . ')';
+		} elseif ($where_definition == 'LIKE')
+		{
+			return ' :_' . $i;
 		} else
 		{
 			return ' = :_' . $i;
