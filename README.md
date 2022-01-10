@@ -27,12 +27,12 @@
 
 ### 目录结构
 
-![image](https://github.com/shenpeiliang/shenPhp/blob/master/doc/1.png)
+![image](doc/1.png)
 
 
 ### 开发文档
 
-- [开发文档](https://github.com/shenpeiliang/shenPhp/blob/master/doc/README.md)
+- [开发文档](https://gitee.com/harry_shen/SHPhp/blob/master/doc/README.md)
 
 
 ### 学习交流
