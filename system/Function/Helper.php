@@ -12,21 +12,22 @@ use Core\Cache\CacheFactory;
  * @param int $expire
  * @return mixed
  */
-function cache($key, $data = NULL, $expire = 1800){
+function cache($key, $data = NULL, $expire = 1800)
+{
     //缓存
     $factory = new CacheFactory();
     $cache = $factory->create();
 
     //获取
-    if(is_null($data))
+    if (is_null($data))
         return $cache->get($key);
 
     //删除
-    if($data === FALSE)
+    if ($data === FALSE)
         return $cache->delete($key);
 
     //保存
-    return  $cache->save($key, $data, $expire);
+    return $cache->save($key, $data, $expire);
 }
 
 /**
@@ -36,7 +37,7 @@ function cache($key, $data = NULL, $expire = 1800){
  */
 function get_instance(string $class)
 {
-	return $class::get_instance();
+    return $class::get_instance();
 }
 
 /**
@@ -47,7 +48,7 @@ function get_instance(string $class)
  */
 function config(string $keys, $default = NULL)
 {
-	return get_instance('\Core\Config')->get_app_config($keys, $default);
+    return get_instance('\Core\Config')->get_app_config($keys, $default);
 }
 
 /**
@@ -56,7 +57,7 @@ function config(string $keys, $default = NULL)
  */
 function convention_config(string $keys)
 {
-	return get_instance('\Core\Config')->get_convention_config($keys);
+    return get_instance('\Core\Config')->get_convention_config($keys);
 }
 
 /**
@@ -67,27 +68,27 @@ function convention_config(string $keys)
  */
 function array_map_recursive(string $filter, array $data)
 {
-	$result = [];
-	foreach ($data as $key => $val)
-	{
-		$result[$key] = is_array($val)
-			? array_map_recursive($filter, $val)
-			: call_user_func($filter, $val);
-	}
-	return $result;
+    $result = [];
+    foreach ($data as $key => $val) {
+        $result[$key] = is_array($val)
+            ? array_map_recursive($filter, $val)
+            : call_user_func($filter, $val);
+    }
+    return $result;
 }
 
 /**
  * 框架过滤方法
  * @param string $value
  */
-function frame_filter(string &$value)
+function frame_filter(string $value)
 {
-	// 过滤查询特殊字符
-	if (preg_match('/^(EXP|NEQ|GT|EGT|LT|ELT|OR|XOR|LIKE|NOTLIKE|NOT BETWEEN|NOTBETWEEN|BETWEEN|NOTIN|NOT IN|IN)$/i', $value))
-	{
-		$value .= ' ';
-	}
+    // 过滤查询特殊字符
+    if (preg_match('/^(EXP|NEQ|GT|EGT|LT|ELT|OR|XOR|LIKE|NOTLIKE|NOT BETWEEN|NOTBETWEEN|BETWEEN|NOTIN|NOT IN|IN)$/i', $value)) {
+        $value .= ' ';
+    }
+
+    return $value;
 }
 
 /**
@@ -95,24 +96,20 @@ function frame_filter(string &$value)
  */
 function remove_xss($var)
 {
-	static $_parser = null;
-	if ($_parser === null)
-	{
-		require_once SRC_PATH.'vendor/autoload.php';
-		$config = HTMLPurifier_Config::createDefault();
-		$_parser = new HTMLPurifier ($config);
-	}
-	if (is_array($var))
-	{
-		foreach ($var as $key => $val)
-		{
-			$var [$key] = remove_xss($val);
-		}
-	} else
-	{
-		$var = $_parser->purify($var);
-	}
-	return $var;
+    static $_parser = null;
+    if ($_parser === null) {
+        require_once SRC_PATH . 'vendor/autoload.php';
+        $config = HTMLPurifier_Config::createDefault();
+        $_parser = new HTMLPurifier ($config);
+    }
+    if (is_array($var)) {
+        foreach ($var as $key => $val) {
+            $var [$key] = remove_xss($val);
+        }
+    } else {
+        $var = $_parser->purify($var);
+    }
+    return $var;
 }
 
 /**
@@ -121,7 +118,37 @@ function remove_xss($var)
  */
 function debug_dump($data)
 {
-	require_once SRC_PATH.'vendor/autoload.php';
-	dump($data);
+    dump($data);
+}
+
+/**
+ * 获取客户端IP地址
+ * @param integer $type 返回类型 0 返回IP地址 ;1 返回IPV4地址数字
+ * @param boolean $adv 是否进行高级模式获取（有可能被伪装）
+ * @return mixed
+ */
+function get_client_ip($type = 0, $adv = false)
+{
+    $type = $type ? 1 : 0;
+    static $ip = NULL;
+    if ($ip !== NULL) return $ip[$type];
+    if ($adv) {
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $arr = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            $pos = array_search('unknown', $arr);
+            if (false !== $pos) unset($arr[$pos]);
+            $ip = trim($arr[0]);
+        } elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+    } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    // IP地址合法验证
+    $long = sprintf("%u", ip2long($ip));
+    $ip = $long ? [$ip, $long] : array('0.0.0.0', 0);
+    return $ip[$type];
 }
 

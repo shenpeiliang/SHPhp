@@ -1,5 +1,18 @@
 <?php
 return [
+    'api' => [
+        //ip白名单
+        'allowed_ips' => array(
+            '127.0.0.*',
+            '192.168.*'
+        ),
+        'authkey' => 'redis#key#api#version_1',
+        'source' => array(
+            '10086',
+            '10000'
+        ),
+    ],
+
     //app客户端
     'allow_client_version' => [
         'android' => [

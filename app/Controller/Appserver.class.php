@@ -5,7 +5,7 @@ namespace Controller;
 use Core\Controller;
 
 /**
- * 接口基类
+ * 接口基类 用于APP接口访问
  * 签名
  * @author shenpeiliang
  * @date 2022-01-17 15:02:57
@@ -72,6 +72,7 @@ class Appserver extends Controller
     public function __construct()
     {
         parent::__construct();
+
         //配置
         $this->allow_client_version = config('common.allow_client_version');
 
@@ -172,46 +173,5 @@ class Appserver extends Controller
         //验证是否通过
         if ($sign !== $signature)
             $this->_fail('SIGN_MISMATCH', '签名不匹配');
-
     }
-
-
-    /**
-     * 成功响应
-     * @param array $data
-     * @param string $msg
-     */
-    protected function _ok($data = [], $msg = '')
-    {
-        $this->_json_result('ok', $msg, $data);
-    }
-
-    /**
-     * 失败响应
-     * @param string $code
-     * @param string $msg
-     */
-    protected function _fail($code = '', $msg = '')
-    {
-        if (!$code)
-            $code = 'unknown_error';
-
-        if (!$msg)
-            $msg = '未知错误';
-
-        $this->_json_result($code, $msg);
-    }
-
-    /**
-     * JSON格式化数据结果
-     * @param $code
-     * @param string $msg
-     * @param array $data
-     * @return false|string
-     */
-    protected function _json_result($code, $msg = '', $data = [])
-    {
-        $this->response->json(compact('code', 'msg', 'data'));
-    }
-
 }

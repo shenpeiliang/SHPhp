@@ -61,8 +61,10 @@ class Request
 	private function _get_request_data(array $input, string $name = '', $default_value = '', $filter_function = '')
 	{
 		//过滤方法
-        if (is_string($filter_function))
+        if ($filter_function && is_string($filter_function))
             $filter_function = explode(',', $filter_function);
+        else
+            $filter_function = [];
 
 		if ('' == $name)
 		{//获取全局

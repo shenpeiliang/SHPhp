@@ -71,5 +71,43 @@ class Controller
 		$this->view->display($template_file, $is_return);
 	}
 
+    /**
+     * 成功响应
+     * @param array $data
+     * @param string $msg
+     */
+    protected function _ok($data = [], $msg = '')
+    {
+        $this->_json_result('ok', $msg, $data);
+    }
+
+    /**
+     * 失败响应
+     * @param string $code
+     * @param string $msg
+     */
+    protected function _fail($code = '', $msg = '')
+    {
+        if (!$code)
+            $code = 'unknown_error';
+
+        if (!$msg)
+            $msg = '未知错误';
+
+        $this->_json_result($code, $msg);
+    }
+
+    /**
+     * JSON格式化数据结果
+     * @param $code
+     * @param string $msg
+     * @param array $data
+     * @return false|string
+     */
+    protected function _json_result($code, $msg = '', $data = [])
+    {
+        $this->response->json(compact('code', 'msg', 'data'));
+    }
+
 
 }
