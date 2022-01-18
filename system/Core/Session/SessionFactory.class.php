@@ -17,7 +17,7 @@ class SessionFactory implements BaseFactoryInterface
 	 */
 	public function create(): \SessionHandlerInterface{
 		//基本配置
-		$session_base = new \Core\Session\SessionBase();
+		$session_base = new SessionBase();
 
 		//配置文件中是否有配置
 		$session_driver = convention_config('session.driver');

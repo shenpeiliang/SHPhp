@@ -2,6 +2,11 @@
 namespace Controller;
 use Core\Controller;
 
+/**
+ * 默认首页
+ * @author shenpeiliang
+ * @date 2022-01-17 11:39:21
+ */
 class Index extends Controller{
 
 	public function index(){

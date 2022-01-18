@@ -32,7 +32,7 @@
 
 ### 开发文档
 
-- [开发文档](https://gitee.com/harry_shen/SHPhp/blob/master/doc/README.md)
+- [开发文档](doc/README.md)
 
 
 ### 学习交流

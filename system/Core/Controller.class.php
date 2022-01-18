@@ -1,5 +1,8 @@
 <?php
 namespace Core;
+use Core\Http\Request;
+use Core\Http\Response;
+
 /**
  * 控制器
  * Class Controller
@@ -28,11 +31,11 @@ class Controller
 	function __construct()
 	{
 		//模板对象
-		$this->view = new \Core\View();
+		$this->view = new View();
 
-		$this->response = new \Core\Http\Response();
+		$this->response = new Response();
 
-		$this->request = new \Core\Http\Request();
+		$this->request = new Request();
 	}
 
     /**

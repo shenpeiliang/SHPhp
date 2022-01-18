@@ -6,6 +6,8 @@ use Exception\FremeException;
 
 /**
  * 文件异常基类
+ * @author shenpeiliang
+ * @date 2022-01-17 11:26:09
  */
 class FileException extends FremeException implements ExceptionInterface
 {

@@ -15,9 +15,10 @@ class CacheFactory implements BaseFactoryInterface
 	 * 创建驱动
 	 * @return CacheInterface
 	 */
-	public function create(): \Core\Cache\CacheInterface{
+	public function create(): CacheInterface
+    {
 		//基本配置
-		$base = new \Core\Cache\CacheBase();
+		$base = new CacheBase();
 
 		//使用默认配置
 		$driver_object = $base->valid_drivers[$base->default_driver];

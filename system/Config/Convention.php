@@ -5,6 +5,9 @@ return [
 	//页面缓存
 	'http_cache_control' => 'private',
 
+    //异常模板文件
+    'tmpl_exception_file'   =>  SYSTEM_PATH.'Tpl/Exception.html',
+
 	//模板引擎配置项
 	'template_option' => [
 		'smarty' => [ // smarty引擎

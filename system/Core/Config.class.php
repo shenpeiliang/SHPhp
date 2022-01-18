@@ -1,6 +1,8 @@
 <?php
 
 namespace Core;
+use Exception\FileException;
+
 /**
  * 配置 - 单例应用
  * Class Config
@@ -55,15 +57,15 @@ class Config
 
         if (empty(self::$config['app_' . $file])) {
             //配置文件绝对路径
-            $absolute_path = APP_PATH . 'Conf/' . (defined('ENVIRONMENT') ? ENVIRONMENT . '/' : '') . $file . '.php';
+            $absolute_path = APP_PATH . 'Conf/' . (defined('ENVIRONMENT') ? ucfirst(ENVIRONMENT) . '/' : '') . $file . '.php';
             if (!is_file($absolute_path))
-                throw \Exception\FileException::for_not_found();
+                throw FileException::for_not_found();
 
             //包含文件
             $config = include($absolute_path);
 
             if (!isset($config) || !is_array($config))
-                throw  \Exception\FileException::for_error_param();
+                throw  FileException::for_error_param();
 
             //配置文件的数组名为config
             self::$config['app_' . $file] = $config;
@@ -106,13 +108,13 @@ class Config
             //配置文件绝对路径
             $absolute_path = SYSTEM_PATH . 'Config/' . $file . '.php';
             if (!is_file($absolute_path))
-                throw \Exception\FileException::for_not_found();
+                throw FileException::for_not_found();
 
             //包含文件
             $config = include($absolute_path);
 
             if (!isset($config) || !is_array($config))
-                throw  \Exception\FileException::for_error_param();
+                throw  FileException::for_error_param();
 
             //配置文件的数组名为config
             self::$config['system_' . $file] = $config;

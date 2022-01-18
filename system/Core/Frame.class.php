@@ -13,6 +13,9 @@ class Frame
 		//时区设置
 		date_default_timezone_set('Asia/Shanghai');
 
+        //composer
+        require_once SRC_PATH . 'vendor/autoload.php';
+
 		//自动加载
 		include SYSTEM_PATH . 'Core/Loader.class.php';
 		spl_autoload_register('\Core\Loader::autoload');
@@ -21,7 +24,7 @@ class Frame
 		include SYSTEM_PATH . 'Function/Helper.php';
 
 		//session启动
-		new \Core\Session();
+        new Session();
 
 		//注册一个会在php中止时执行的函数
 		register_shutdown_function('\Core\Frame::fatal_error');
@@ -41,7 +44,15 @@ class Frame
 
 		//方法实现
 		try{
-			call_user_func_array(array(new $class(), $route->get_method()), $route->get_method_param());
+            if(!class_exists($class))
+                throw new \Exception(sprintf('控制器%s不存在', $class), 0);
+
+            $handler = new $class();
+            $method = $route->get_method();
+            if(!method_exists($handler, $method))
+                throw new FremeException(sprintf('控制器%s中方法%s不存在', $class, $method), 0);
+
+            call_user_func_array([$handler, $method], $route->get_method_param());
 		}catch(\Exception $e){
 			FremeException::for_system_error($e);
 		}
@@ -54,17 +65,8 @@ class Frame
 	{
 		if ($e = error_get_last())
 		{
-			switch ($e['type'])
-			{
-				case E_ERROR: //致命的运行时错误
-				case E_PARSE: //编译时语法解析错误
-				case E_CORE_ERROR: //在PHP初始化启动过程中发生的致命错误
-				case E_COMPILE_ERROR: //致命编译时错误
-				case E_USER_ERROR: //用户产生的错误信息
-					ob_end_clean();
-					self::halt($e);
-					break;
-			}
+            ob_end_clean();
+            self::halt($e);
 		}
 	}
 

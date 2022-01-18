@@ -5,7 +5,7 @@ declare(strict_types = 1);
 if (version_compare(PHP_VERSION, '7.0.0', '<')) die('require PHP > 7.0.0 !');
 
 //开启调试模式 建议开发阶段开启 部署阶段注释或者设为false
-define('APP_DEBUG', TRUE);
+define('APP_DEBUG', FALSE);
 
 //配置环境 开发dev 生产prod 测试test
 define('ENVIRONMENT', 'dev');

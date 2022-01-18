@@ -3,6 +3,32 @@
  * 助手文件
  */
 
+use Core\Cache\CacheFactory;
+
+/**
+ * 缓存
+ * @param $key
+ * @param null $data
+ * @param int $expire
+ * @return mixed
+ */
+function cache($key, $data = NULL, $expire = 1800){
+    //缓存
+    $factory = new CacheFactory();
+    $cache = $factory->create();
+
+    //获取
+    if(is_null($data))
+        return $cache->get($key);
+
+    //删除
+    if($data === FALSE)
+        return $cache->delete($key);
+
+    //保存
+    return  $cache->save($key, $data, $expire);
+}
+
 /**
  * 获取实例
  * @param string $class

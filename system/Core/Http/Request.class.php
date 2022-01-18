@@ -2,7 +2,8 @@
 namespace Core\Http;
 /**
  * 请求处理
- * shenpeiliang
+ * @author shenpeiliang
+ * @date 2022-01-17 15:49:00
  */
 class Request
 {
@@ -16,8 +17,11 @@ class Request
 	{
 		$data = $input;
 
-		//过滤方法
-		$filters[] = 'frame_filter'; //框架默认的过滤方法
+		//过滤方法 框架默认的过滤方法
+		$filters = [
+            'frame_filter',
+            'trim',
+        ];
 
 		//合并用户指定需要过滤的安全方法
 		if ($filter_function)
@@ -57,11 +61,8 @@ class Request
 	private function _get_request_data(array $input, string $name = '', $default_value = '', $filter_function = '')
 	{
 		//过滤方法
-		if ($filter_function)
-		{
-			if (is_string($filter_function))
-				$filter_function = explode(',', $filter_function);
-		}
+        if (is_string($filter_function))
+            $filter_function = explode(',', $filter_function);
 
 		if ('' == $name)
 		{//获取全局

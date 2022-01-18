@@ -2,8 +2,11 @@
 namespace Exception;
 use Exception\ExceptionInterface;
 use Exception\FremeException;
+
 /**
  * 加载异常基类
+ * @author shenpeiliang
+ * @date 2022-01-17 11:40:24
  */
 class AutoLoadException extends FremeException implements ExceptionInterface{
 	/**

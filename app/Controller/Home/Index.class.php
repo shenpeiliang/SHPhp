@@ -1,6 +1,12 @@
 <?php
 namespace Controller\Home;
 use Core\Controller;
+
+/**
+ * home模块默认
+ * @author shenpeiliang
+ * @date 2022-01-17 11:39:36
+ */
 class Index extends Controller{
 	/**
 	 * 默认方法

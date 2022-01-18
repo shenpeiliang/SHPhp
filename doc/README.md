@@ -9,11 +9,18 @@
 - vendor第三方扩展目录
 
 
+需要composer安装依赖包
+```
+composer install
+```
+
+
+
 ### 配置介绍
 
 1、目录结构
 
-![image](https://github.com/shenpeiliang/shenPhp/blob/master/doc/2.png)
+![image](2.png)
 
 
 - Dev开发环境配置
@@ -29,7 +36,7 @@ define('ENVIRONMENT', 'dev');
 
 2、数据库配置
 
-![image](https://github.com/shenpeiliang/shenPhp/blob/master/doc/3.png)
+![image](3.png)
 
 
 3、其他说明
@@ -88,7 +95,7 @@ class Index extends Controller{
 
 - 模板引擎驱动配置项：'template_driver' => 'origin'，其他配置项参考
 
-![image](https://github.com/shenpeiliang/shenPhp/blob/master/doc/4.png)
+![image](4.png)
 
 - 框架提供了三种模板引擎，frame是框架自定义的模板引擎，默认使用，origin为原生PHP模板引擎，还有smarty模板引擎
 
@@ -106,7 +113,7 @@ $this->display();
 
 - 结构图
 
-![image](https://github.com/shenpeiliang/shenPhp/blob/master/doc/5.png)
+![image](5.png)
 
 - 默认使用Redis存储
 
@@ -154,7 +161,7 @@ class DemoModel extends Model
 
 - 目录结构
 
-![image](https://github.com/shenpeiliang/shenPhp/blob/master/doc/6.png)
+![image](6.png)
 
 - 使用参考
 

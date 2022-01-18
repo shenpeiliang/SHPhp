@@ -1,5 +1,9 @@
 <?php
 namespace Core;
+use Core\Template\TemplateBase;
+use Core\Template\TemplateFactory;
+use Exception\FileException;
+
 /**
  * 视图处理
  * Class View
@@ -48,16 +52,16 @@ class View
 	 * 加载视图页面
 	 * @param string $template_file
 	 * @return string
-	 * @throws \Exception\FileException
+	 * @throws FileException
 	 */
 	public function load(string $template_file) {
 		//模板绝对路径
 		$absolute_path = $this->get_template_path($template_file);
 		if (!is_file($absolute_path))
-			throw \Exception\FileException::for_not_found($absolute_path);
+			throw FileException::for_not_found($absolute_path);
 
 		//解析模板标签
-		$template = new \Core\Template\TemplateFactory();
+		$template = new TemplateFactory();
 		$content = $template->create()->fetch($absolute_path, $this->var);
 
 		echo $content;
@@ -68,17 +72,21 @@ class View
 	 * @param string $template_file
 	 * @param bool $is_return
 	 * @return mixed|string
-	 * @throws \Exception\FileException
+	 * @throws FileException
 	 */
 	public function display(string $template_file, bool $is_return = FALSE)
 	{
 		//模板绝对路径
-		$absolute_path = $this->get_template_path($template_file);
+        if(0 === strpos($template_file, SYSTEM_PATH))
+            $absolute_path = $template_file;
+        else
+		    $absolute_path = $this->get_template_path($template_file);
+
 		if (!is_file($absolute_path))
-			throw \Exception\FileException::for_not_found($absolute_path);
+			throw FileException::for_not_found($absolute_path);
 
 		//解析模板标签
-		$template = new \Core\Template\TemplateFactory();
+		$template = new TemplateFactory();
 		$content = $template->create()->fetch($absolute_path, $this->var);
 
 		//直接返回结果，不输出
@@ -104,9 +112,9 @@ class View
 		$dir_view = APP_PATH . 'View/' . ucfirst(convention_config('template_theme'));
 
 		//使用的模板引擎
-		$template_base = new \Core\Template\TemplateBase();
+		$template_base = new TemplateBase();
 		//使用默认配置
-		$template_driver = \Core\Template\TemplateBase::$default_driver;
+		$template_driver = TemplateBase::$default_driver;
 
 		//配置文件中是否有配置
 		$template_driver_config = ucfirst(convention_config('template_driver'));

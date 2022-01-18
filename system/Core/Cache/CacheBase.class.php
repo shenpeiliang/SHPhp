@@ -9,6 +9,8 @@
 namespace Core\Cache;
 
 
+use Core\Cache\Driver\RedisHandler;
+
 class CacheBase
 {
 	/**
@@ -22,6 +24,6 @@ class CacheBase
 	 * @var array
 	 */
 	public $valid_drivers = [
-		'Redis' => \Core\Cache\Driver\RedisHandler::class
+		'Redis' => RedisHandler::class
 	];
 }

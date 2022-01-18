@@ -9,6 +9,8 @@
 namespace Core\Session;
 
 
+use Core\Session\Driver\RedisHandler;
+
 class SessionBase
 {
 	/**
@@ -16,6 +18,6 @@ class SessionBase
 	 * @var array
 	 */
 	public $valid_drivers = [
-		'Redis' => \Core\Session\Driver\RedisHandler::class
+		'Redis' => RedisHandler::class
 	];
 }
