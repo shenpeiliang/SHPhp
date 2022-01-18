@@ -161,7 +161,13 @@ class Appserver extends Controller
             $this->_fail('TIME_EXPIRED', '请求时间超时');
 
         //需要签名加密的字段值
-        $params = compact(array_keys($this->required));
+        $params = [
+            "client_type" => $this->client_version,
+            "client_version" => $this->client_version,
+            "uuid" => $this->uuid,
+            "api_version" => $this->api_version,
+            "timestamp" => $timestamp
+        ];
         ksort($params);  //按数组的键排序
         $sign = ''; //需要签名加密组合的字符串
         foreach ($params as $key => $val) {
