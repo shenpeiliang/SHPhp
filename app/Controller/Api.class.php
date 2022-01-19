@@ -6,8 +6,8 @@ use Core\Controller;
 
 /**
  * 接口验证操作类 用于第三方接口调用
- * 必须传递的字段信息：'data','time','source','sign'
- * 进行加密的字段信息：'data', 'time', 'source','authkey'
+ * 必须传递的字段信息：'data','timestamp','source','signature'
+ * 进行加密的字段信息：'data', 'timestamp', 'source','authkey'
  * 加密规则：加密字段先按字典排序，然后再进行sha1加密
  * @author shenpeiliang
  * @date 2022-01-18 16:41:31
@@ -61,38 +61,38 @@ class Api extends Controller
         }
 
         //必须字段
-        $required = ['data', 'time', 'source', 'sign'];
+        $required = ['data', 'timestamp', 'source', 'signature'];
         foreach ($required as $item) {
             if (!$this->request->post($item, false))
                 $this->_fail(strtoupper($item) . '_INVALID', '缺少必须字段');
         }
         //请求数据
         $data = $this->request->post('data');//json数据
-        $time = $this->request->post('time', 0, 'intval');//时间戳
+        $timestamp = $this->request->post('timestamp', 0, 'intval');//时间戳
         $this->_source = $source = $this->request->post('source', 0, 'intval');//来源
-        $sign = $this->request->post('sign');//签名
+        $signature = $this->request->post('signature');//签名
 
         //检查来源
         if (!in_array($source, $this->_config['source']))
             $this->_fail('SOURCE_INVALID', '来源不允许');
 
         // 检查时间戳
-        if (abs($time - time()) > self::TIME_EXCEED)
+        if (abs($timestamp - time()) > self::TIME_EXCEED)
             $this->_fail('TIME_EXPIRED', '请求时间超时');
 
         // 检查签名
         $authkey = $this->_config['authkey'];
 
         //需要签名加密的字段值
-        $args = compact('data', 'time', 'source', 'authkey');
+        $args = compact('data', 'timestamp', 'source', 'authkey');
 
         ksort($args);  //按数组的键排序
-        $signature = ''; //需要签名加密组合的字符串
+        $sign = ''; //需要签名加密组合的字符串
         foreach ($args as $key => $val) {
-            $signature .= $key . '=' . $val;
+            $sign .= $key . '=' . $val;
         }
         //sha1加密
-        $signature = sha1($signature);
+        $sign = sha1($sign);
 
         //验证是否通过
         if ($sign !== $signature)
