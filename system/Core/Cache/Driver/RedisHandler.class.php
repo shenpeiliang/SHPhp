@@ -9,6 +9,7 @@
 namespace Core\Cache\Driver;
 
 use Core\Cache\CacheInterface;
+use Exception\CacheException;
 
 
 class RedisHandler implements CacheInterface
@@ -19,8 +20,12 @@ class RedisHandler implements CacheInterface
 	public function __construct()
 	{
 		//初始化
-		$this->init();
-	}
+        try {
+            $this->init();
+        } catch (CacheException $e) {
+            printf("Redis连接错误：%s - %s", $e->getCode(), $e->getMessage());
+        }
+    }
 
 	/**
 	 * 获取链接对象
@@ -35,7 +40,7 @@ class RedisHandler implements CacheInterface
 	 * 初始化
 	 * @return mixed
 	 */
-	public function init()
+	public function init(): void
 	{
 		try
 		{
