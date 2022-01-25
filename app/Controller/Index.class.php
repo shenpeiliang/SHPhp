@@ -1,7 +1,7 @@
 <?php
 namespace Controller;
 use Core\Controller;
-use Core\Crypt\Driver\OpensslHandler;
+use Core\Crypt\Driver\AesHandler;
 use Core\Crypt\Driver\Rsa2Handler;
 
 /**
@@ -53,10 +53,10 @@ class Index extends Controller{
     public function crypt(){
         $str = "hello world !!";
 
-	    $crypt = new OpensslHandler();
-	    $encrypt_str = $crypt->encrypt($str);
+	    $aes = new AesHandler();
+	    $encrypt_str = $aes->encrypt($str);
 
-	    $decrypt_str = $crypt->decrypt($encrypt_str);
+	    $decrypt_str = $aes->decrypt($encrypt_str);
 
 	    var_dump($encrypt_str, $decrypt_str);
 

@@ -8,7 +8,7 @@ use Core\Crypt\CryptInterface;
  * @author shenpeiliang
  * @date 2022-01-24 12:01:38
  */
-class OpensslHandler implements CryptInterface
+class AesHandler implements CryptInterface
 {
     /**
      * 加密
@@ -18,10 +18,10 @@ class OpensslHandler implements CryptInterface
 	public function encrypt(string $data)
     {
         //秘钥
-        $key = convention_config('crypt.openssl.key');
+        $key = convention_config('crypt.aes.key');
 
         //加密方法
-        $method = convention_config('crypt.openssl.method');
+        $method = convention_config('crypt.aes.method');
 
         //向量
         //二进制字符串转换为十六进制值，注意解码过程中使用的是substr/strlen是不携带编码的，否则分割字符串时不对
@@ -55,9 +55,9 @@ class OpensslHandler implements CryptInterface
         $encrypted_str = substr($data, $index + 1, strlen($data));
 
         //秘钥
-        $key = convention_config('crypt.openssl.key');
+        $key = convention_config('crypt.aes.key');
         //加密方法
-        $method = convention_config('crypt.openssl.method');
+        $method = convention_config('crypt.aes.method');
 
         return openssl_decrypt($encrypted_str, $method, $key, OPENSSL_RAW_DATA , $iv);
     }

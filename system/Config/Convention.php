@@ -113,7 +113,7 @@ return [
 
     //加密配置
     'crypt' => [
-        'openssl' => [
+        'aes' => [
             'key' => 'shikee!root',
             'method' => 'AES-128-CBC', //加密方法
         ],
