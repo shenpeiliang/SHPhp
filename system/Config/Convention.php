@@ -120,7 +120,7 @@ return [
         'rsa' => [
             'private_key' => SRC_PATH . 'system/Config/rsa_private_key.pem',
             'public_key' => SRC_PATH . 'system/Config/rsa_public_key.pem',
-            'algorithm' => 'OPENSSL_ALGO_SHA256', //RSA2
+            'algorithm' => OPENSSL_ALGO_SHA256, //RSA2
         ],
 
     ],

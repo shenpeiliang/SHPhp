@@ -65,5 +65,11 @@ class Index extends Controller{
         $encrypt_str = $rsa->encrypt($str);
         $decrypt_str = $rsa->decrypt($encrypt_str);
         var_dump($encrypt_str, $decrypt_str);
+
+        echo "<br/>";
+        $rsa = new Rsa2Handler();
+        $encrypt_str = $rsa->create_sign($str);
+        $decrypt_str = $rsa->verify_sign($str, $encrypt_str);
+        var_dump($encrypt_str, $decrypt_str);
     }
 }

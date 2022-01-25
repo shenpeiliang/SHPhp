@@ -94,6 +94,6 @@ class Rsa2Handler implements CryptInterface
             return false;
 
         //验证签名
-        return openssl_verify(base64_decode($data), $signature, $public_key, convention_config('crypt.rsa.algorithm'));
+        return openssl_verify($data, base64_decode($signature), $public_key, convention_config('crypt.rsa.algorithm'));
     }
 }
