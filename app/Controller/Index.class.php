@@ -1,6 +1,8 @@
 <?php
 namespace Controller;
 use Core\Controller;
+use Core\Crypt\Driver\OpensslHandler;
+use Core\Crypt\Driver\Rsa2Handler;
 
 /**
  * 默认首页
@@ -43,5 +45,25 @@ class Index extends Controller{
 	    $mod = new \Model\DemoModel();
 
 	    var_dump($mod->get());
+    }
+
+    /**
+     * 加解密测试
+     */
+    public function crypt(){
+        $str = "hello world !!";
+
+	    $crypt = new OpensslHandler();
+	    $encrypt_str = $crypt->encrypt($str);
+
+	    $decrypt_str = $crypt->decrypt($encrypt_str);
+
+	    var_dump($encrypt_str, $decrypt_str);
+
+	    echo "<br/>";
+	    $rsa = new Rsa2Handler();
+        $encrypt_str = $rsa->encrypt($str);
+        $decrypt_str = $rsa->decrypt($encrypt_str);
+        var_dump($encrypt_str, $decrypt_str);
     }
 }

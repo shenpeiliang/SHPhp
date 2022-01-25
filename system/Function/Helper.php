@@ -152,3 +152,22 @@ function get_client_ip($type = 0, $adv = false)
     return $ip[$type];
 }
 
+/**
+ * 获取指定长度的随机字符
+ * @param int $length
+ * @return string
+ */
+function get_rand_string(int $length){
+    $source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+
+    $arr = [];
+
+    $max_index = strlen($source) - 1;
+
+    for($i = 0; $i < $length; $i++){
+        $arr[] = $source[mt_rand(0, $max_index)];
+    }
+
+    return implode('', $arr);
+}
+

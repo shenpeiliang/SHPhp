@@ -109,5 +109,19 @@ return [
 		'domain' => '',
 		'secure' => FALSE, //是否仅仅通过安全的 HTTPS 连接传给客户端
 		'httponly' => TRUE,
-	]
+	],
+
+    //加密配置
+    'crypt' => [
+        'openssl' => [
+            'key' => 'shikee!root',
+            'method' => 'AES-128-CBC', //加密方法
+        ],
+        'rsa' => [
+            'private_key' => SRC_PATH . 'system/Config/rsa_private_key.pem',
+            'public_key' => SRC_PATH . 'system/Config/rsa_public_key.pem',
+            'algorithm' => 'OPENSSL_ALGO_SHA256', //RSA2
+        ],
+
+    ],
 ];
