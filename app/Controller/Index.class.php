@@ -3,6 +3,7 @@ namespace Controller;
 use Core\Controller;
 use Core\Crypt\Driver\AesHandler;
 use Core\Crypt\Driver\Rsa2Handler;
+use Library\SecurityCard;
 
 /**
  * 默认首页
@@ -71,5 +72,18 @@ class Index extends Controller{
         $encrypt_str = $rsa->create_sign($str);
         $decrypt_str = $rsa->verify_sign($str, $encrypt_str);
         var_dump($encrypt_str, $decrypt_str);
+    }
+
+    //密保卡
+    public function card(){
+        $card = new SecurityCard();
+        $keys = $card->create();
+
+        $info = implode('', $card->entry());
+
+        $input = '232301';
+        $flag = $card->check($keys, $info, $input);
+
+        var_dump($keys, $info, $flag);
     }
 }

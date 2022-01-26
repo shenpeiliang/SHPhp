@@ -55,6 +55,7 @@ return [
 					'map' =>
 						[
 							'Core' => SYSTEM_PATH . 'Core',
+                            'Library' => SYSTEM_PATH . 'Library',
 							'Exception' => SYSTEM_PATH . 'Exception'
 						],
 					//被加载文件的后缀名
