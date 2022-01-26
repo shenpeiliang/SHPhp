@@ -3,7 +3,7 @@
 namespace Library;
 
 /**
- * 密保卡安全验证
+ * 密保卡
  * @author shenpeiliang
  * @date 2022-01-26 11:03:07
  */
@@ -31,10 +31,19 @@ class SecurityCard
 
     /**
      * 密保卡下标
+     *
      * @var unknown
      */
     public $key;
 
+    /**
+     * SecurityCard constructor.
+     * @param array $option
+     *  length 横纵坐标索引数 默认9
+     *  is_upper 横向索引是否大写 默认true
+     *  num 坐标值长度 默认3
+     *  key 横向索引名 默认abcdefghilkmnopqrstuvwxyz
+     */
     public function __construct(array $option = [])
     {
         //初始化配置
