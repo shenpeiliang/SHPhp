@@ -150,6 +150,11 @@ class SecurityCard
         $coordinate_2 = mb_substr($matches[1][1], 0, 1, 'utf-8');
         $coordinate_2_1 = mb_substr($matches[1][1], 1, mb_strlen($matches[1][1]), 'utf-8');
 
+        if($this->is_upper){
+            $coordinate_1 = strtoupper($coordinate_1);
+            $coordinate_2 = strtoupper($coordinate_2);
+        }
+
         if (!isset($keys[$coordinate_1][$coordinate_1_1]) || !isset($keys[$coordinate_2][$coordinate_2_1])) {
             $this->err = '参数code不存在';
             return false;
