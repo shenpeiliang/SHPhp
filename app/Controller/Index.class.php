@@ -3,6 +3,7 @@ namespace Controller;
 use Core\Controller;
 use Core\Crypt\Driver\AesHandler;
 use Core\Crypt\Driver\Rsa2Handler;
+use Core\File\VersionFactory;
 use Library\SecurityCard;
 
 /**
@@ -85,5 +86,15 @@ class Index extends Controller{
         $flag = $card->check($keys, $info, $input);
 
         var_dump($keys, $info, $flag);
+    }
+
+    //文件版本号获取
+    public function version(){
+        $v = new VersionFactory();
+        $driver = $v->create('Sha1');
+        $output = $driver->set_root_path(SRC_PATH)->get_file_version('app/Controller/Index.class.php');
+        if(!$output)
+            echo $driver->error;
+        echo $output;
     }
 }

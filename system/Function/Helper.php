@@ -171,3 +171,48 @@ function get_rand_string(int $length){
     return implode('', $arr);
 }
 
+/**
+ * 加载JS
+ * @param string $files 文件
+ * @param string $version 版本号
+ * @return string html
+ */
+function load_js(string $files, $version)
+{
+    if (!$files) {
+        return '';
+    }
+    if (!is_array($files)) {
+        $files = array($files);
+    }
+    $html = '';
+    foreach ($files as $file) {
+        $html .= '<script type="text/javascript" src="' . htmlspecialchars($file . '?v=' . $version) . '"></script>' . "\n";
+    }
+    return $html;
+
+}
+
+/**
+ * 加载CSS
+ * @param string $files 文件
+ * @param string $version 版本号
+ * @return string html
+ */
+function load_css($files, $version)
+{
+    if (!$files) {
+        return '';
+    }
+
+    if (!is_array($files)) {
+        $files = array($files);
+    }
+    $html = '';
+    foreach ($files as $file) {
+
+        $html .= '<link  type="text/css" rel="stylesheet" href="' . htmlspecialchars($file . '?v=' . $version) . '"/>' . "\n";
+    }
+    return $html;
+}
+
