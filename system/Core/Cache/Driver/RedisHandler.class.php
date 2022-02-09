@@ -74,10 +74,10 @@ class RedisHandler implements CacheInterface
 	public function get(string $name)
 	{
 		//是否是只对某个键中的指定值
-		list($key, $data) = expload('.', $name);
+		list($key, $hash_key) = expload('.', $name);
 
-		if ($data)
-			return $this->handler->hGet($key, $data);
+		if ($hash_key)
+			return $this->handler->hGet($key, $hash_key);
 		else
 			return $this->handler->hGetAll($key);
 	}
@@ -85,13 +85,13 @@ class RedisHandler implements CacheInterface
 	/**
 	 * 设置KEY中的指定值
 	 * @param string $key
-	 * @param string $hashKey
+	 * @param string $hash_key
 	 * @param $value
 	 * @return bool
 	 */
-	public function set(string $key, string $hashKey, $value): bool
+	public function set(string $key, string $hash_key, $value): bool
 	{
-		return $this->handler->hSet($key, $hashKey, $value);
+		return $this->handler->hSet($key, $hash_key, $value);
 	}
 
 	/**
@@ -102,27 +102,23 @@ class RedisHandler implements CacheInterface
 	public function exists(string $name): bool
 	{
 		//是否是只对某个键中的指定值
-		list($key, $data) = expload('.', $name);
+		list($key, $hash_key) = expload('.', $name);
 
-		if ($data)
-			return $this->handler->hExists($key, $data);
+		if ($hash_key)
+			return $this->handler->hExists($key, $hash_key);
 		else
 			return $this->handler->exists($key);
 	}
 
-	/**
-	 * 保存
-	 * @param string $key
-	 * @param $value
-	 * @param int $ttl
-	 * @return bool
-	 */
+    /**
+     * 保存
+     * @param string $key
+     * @param $value
+     * @param int $ttl
+     * @return bool
+     */
 	public function save(string $key, $value, int $ttl = 0): bool
 	{
-		//如果是对象类型则序列化
-		if ('object' == gettype($value))
-			$value = serialize($value);
-
 		$flag = $this->handler->hMset($key, $value);
 
 		//设置过期时间
@@ -148,7 +144,7 @@ class RedisHandler implements CacheInterface
 	 */
 	public function keys(string $pattern)
 	{
-		return $this->handler->delete($pattern);
+		return $this->handler->keys($pattern);
 	}
 
 	/**
@@ -160,10 +156,10 @@ class RedisHandler implements CacheInterface
 	public function increment(string $name, int $offset = 1): bool
 	{
 		//是否是只对某个键中的指定值
-		list($key, $data) = expload('.', $name);
+		list($key, $hash_key) = expload('.', $name);
 
-		if ($data)
-			return $this->handler->hIncrBy($key, $data, $offset);
+		if ($hash_key)
+			return $this->handler->hIncrBy($key, $hash_key, $offset);
 		else
 			return $this->handler->incrBy($key, $offset);
 	}
@@ -177,10 +173,10 @@ class RedisHandler implements CacheInterface
 	public function decrement(string $name, int $offset = 1): bool
 	{
 		//是否是只对某个键中的指定值
-		list($key, $data) = expload('.', $name);
+		list($key, $hash_key) = expload('.', $name);
 
-		if ($data)
-			return $this->handler->hIncrBy($key, $data, -$offset);
+		if ($hash_key)
+			return $this->handler->hIncrBy($key, $hash_key, -$offset);
 		else
 			return $this->handler->incrBy($key, -$offset);
 	}

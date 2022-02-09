@@ -9,6 +9,8 @@
 namespace Core;
 
 
+use Core\Session\SessionFactory;
+
 class Session
 {
 	public function __construct()
@@ -38,7 +40,7 @@ class Session
 		if ($config['driver'])
 		{
 			//自定义session处理
-			$session = new \Core\Session\SessionFactory();
+			$session = new SessionFactory();
 			session_set_save_handler($session->create());
 		}
 
