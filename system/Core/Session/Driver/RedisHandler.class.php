@@ -54,7 +54,7 @@ class RedisHandler implements \SessionHandlerInterface
     }
 
     /**
-     * 但是在session_start()函数调用的时候先触发open函数，再触发该函数
+     * 当session_start()函数被调用的时候先触发open函数，再触发该函数
      * @param string $session_id
      * @return string
      */
@@ -101,7 +101,7 @@ class RedisHandler implements \SessionHandlerInterface
     /**
      * 清除垃圾session，也就是清除过期的session。
      * 该函数是基于php.ini中的配置选项
-     * session.gc_divisor, session.gc_probability 和 session.gc_lifetime所设置的值的
+     * session.gc_divisor, session.gc_probability 和 session.gc_lifetime所设置的值
      * @param $maxlifetime
      */
     public function gc($maxlifetime)
